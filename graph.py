@@ -13,7 +13,7 @@ class Node:
     return hash(repr(self))
 
   def __str__(self):
-    return '<Node %s>' % str(self.value)
+    return '<Node %s @%s>' % (str(self.value), str(hex(id(self))))
 
 class Edge:
   """
@@ -72,30 +72,72 @@ class Graph:
         if s_node in self.rev_edges and len(self.rev_edges[s_node]) == 0:
           del self.rev_edges[s_node]
 
-        # Mirrors above
-        if len(self.rev_edges[e_node]) == 0:
-          del self.rev_edges[e_node]
-          if len(self.rev_edges[e_node]) == 0:
-            del self.edges[e_node]
-            if e_node in self.edges and len(self.edges[e_node]) == 0:
-              del self.edges[e_node]
+      # If there are no outgoing edges from the end node, del it
+      if len(self.rev_edges[e_node]) == 0:
+        del self.rev_edges[e_node]
+
+        # If there are no incoming edges to the end node, del it
+        if e_node in self.edges and len(self.edges[e_node]) == 0:
+          del self.edges[e_node]
 
   def get_nodes(self):
+    """
+    O(|V|) time to retrieve all nodes in the graph
+    """
     return set(self.edges.keys()) | set(self.rev_edges.keys())
+
+  def compute_scc(self):
+    """
+    Computes the SCCs of this graph
+    O(|E|) time to iterate through each edge
+    """
+    s_nodes = self.edges.keys()
+    lowlinks, indices, index = {}, {}, [0]
+    components = {}
+    visited = []
+    for s_node in s_nodes:
+      if s_node not in indices:
+        self.__traverse(s_node, lowlinks, indices, index, components, visited)
+    return components
+
+  def __traverse(self, node, lowlinks, indices, index, components, visited):
+    """
+    Private helper function to perform DFS and compute components
+    of graph (final components in lowlinks)
+    """
+    indices[node], lowlinks[node] = index[0], index[0]
+    index[0] += 1
+    visited.append(node)
+    if node in self.edges:
+      for e_node in self.edges[node]:
+        if e_node not in indices:
+          self.__traverse(e_node, lowlinks, indices, index, components, visited)
+          lowlinks[node] = min(lowlinks[node], lowlinks[e_node])
+        else:
+          lowlinks[node] = min(lowlinks[node], indices[e_node])
+
+    lowlink = lowlinks[node]
+    if lowlink == indices[node] and len(visited) > 0:
+      components[lowlink] = set()
+      c_node = visited.pop() 
+      components[lowlink].add(c_node)
+      while len(visited) > 0 and c_node == node:
+        c_node = visited.pop()
+        components[lowlink].add(c_node)
+
 
   def __str__(self):
     graph_str = ""
     for s_node in self.edges:
       neighbors = self.edges[s_node]
       for n in neighbors:
-        graph_str += ("[%s %s]\n" % (s_node, n))
+        graph_str += ("[%s %s]\n" % (str(s_node), str(n)))
     return graph_str
 
 def test():
   a = Node('A')
   b = Node('B')
   c = Node('C')
-  b2 = Node('B')
   e1 = Edge(a,b)
   e2 = Edge(a,c)
   G = Graph()
@@ -105,8 +147,13 @@ def test():
   G.add_edge(e2)
   print "Graph: "
   print G
+  print ""
   print "Removing edge %s" % str(e2)
   G.remove_edge(e2)
+  print "Adding edge %s" % str(e2)
+  G.add_edge(e2)
   print "Graph: "
   print G
-
+  print ""
+  print "SCCs:"
+  print dict((str(node), i) for node, i in G.compute_scc().items())
