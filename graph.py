@@ -106,7 +106,7 @@ class Graph:
     of graph (final components in lowlinks)
     """
     indices[node], lowlinks[node] = index[0], index[0]
-    index[0] += 1
+    index[0] = index[0] + 1
     visited.append(node)
     if node in self.edges:
       for e_node in self.edges[node]:
@@ -119,9 +119,8 @@ class Graph:
     lowlink = lowlinks[node]
     if lowlink == indices[node] and len(visited) > 0:
       components[lowlink] = set()
-      c_node = visited.pop() 
-      components[lowlink].add(c_node)
-      while len(visited) > 0 and c_node == node:
+      c_node = None 
+      while len(visited) > 0 and c_node != node:
         c_node = visited.pop()
         components[lowlink].add(c_node)
 
@@ -140,6 +139,7 @@ def test():
   c = Node('C')
   e1 = Edge(a,b)
   e2 = Edge(a,c)
+  e3 = Edge(c,a)
   G = Graph()
   print "Adding edge %s" % str(e1)
   G.add_edge(e1)
@@ -152,6 +152,8 @@ def test():
   G.remove_edge(e2)
   print "Adding edge %s" % str(e2)
   G.add_edge(e2)
+  print "Adding edge %s" % str(e3)
+  G.add_edge(e3)
   print "Graph: "
   print G
   print ""
