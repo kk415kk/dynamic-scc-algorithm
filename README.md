@@ -1,4 +1,7 @@
-Author: Kevin Kao
+Author
+----
+Kevin Kao
+
 
 Fully Dynamic SCC Maintenance Algorithm
 ----
@@ -18,9 +21,8 @@ Supported Operations:
 * `Query(u, v, i)` - Check if `u, v` are in the same SCC of the i<sup>th</sup> version of the graph
 
 
-
-
 Notes
 ---
+Developed in Python.
 
 
