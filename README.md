@@ -31,6 +31,11 @@ Implementation Details
 ---
 To maintain the component forest, we define the following partition of the edge sets E<sub>0</sub> &sube; E<sub>1</sub> &sube; ... &sube; E<sub>t</sub>:
 
+<b>Definition (Dynamic Edge Partitioning):</b> The dynamic edge set H<sub>i</sub> of G<sub>i</sub> is a set of edges `(u,v)` in G<sub>i</sub> that satisfies <u>all</u> of the following:
+* The nodes `u` and `v` are in the same component of the current version of the graph G<sub>i</sub>, i.e. `query(u, v, i)` does not return `None`.
+* The edge `(u,v)` was present in the previous version of the graph, but the nodes `u` and `v` were <b>NOT</b> in the same component in the previous version of the graph (G<sub>i-1</sub>) <b><u>OR</u></b> the edge `(u,v)` was not in the set of edges in the previous version of the graph G<sub>i-1</sub>, i.e., `(u,v)` &nsube; E<sub>i-1</sub>.
+
+tl;dr: H<sub>i</sub> represents the set of edges in G<sub>i</sub> where `(u,v)` is part of the same SCC in G<sub>i</sub> AND is either 1) existed in the G<sub>i-1</sub> but was not part of the same component, or 2) newly added during the transition from G<sub>i-1</sub> to G<sub>i</sub> (the edge was part of the i<sup>th</sup> current insertion of edges).
 
 Notes
 ---
