@@ -39,6 +39,13 @@ To maintain the component forest, we define the following partition of the edge 
 
 Another way to think of it is that H<sub>i</sub> is composed from all edges that are inter-component edges in G<sub>i-1</sub> (used to only bridge two components in ONE direction but needed an edge in the opposite direction to create a new super-component; after the i<sup>th</sup> `insert(E')`, one of the edges in E' must have helped to create a new super-component), or are not present in G<sub>i-1</sub> (so now, it's part of H<sub>i</sub> because it was the edge that helped create a new super-component), and are intra-component edges in G<sub>i</sub> (because these edges in H<sub>i</sub> helped create a new super-component that didn't exist in the previous version of the graph, and are now part of that new super-component in G<sub>i</sub>). 
 
+Example:
+<pre>
+  A ----> B ----> D
+  \-> C -/
+</pre>
+
+
 Notes
 ---
 Developed in Python.
