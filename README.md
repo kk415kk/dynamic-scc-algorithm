@@ -43,8 +43,8 @@ Example:
 <pre>
   Graph G1
   Edges E1: (A,B), (B,C), (C,A), (B,D)
-  A --------> B ----> D
-   \-- C --\<-/
+  A ----------> B ----> D
+   \-- C --0-\</
 </pre>
 
 <pre>
