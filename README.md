@@ -27,6 +27,10 @@ Supported Operations (in general terms):
 * `Delete(E')` - Delete the set of edges `E'` from <i>all</i> versions of the graph
 * `Query(u, v, i)` - Check if `u, v` are in the same SCC of the i<sup>th</sup> version of the graph
 
+Implementation Details
+---
+To maintain the component forest, we define the following partition of the edge sets E<sub>0</sub> &sube; E<sub>1</sub> &sube; ... &sube; E<sub>t</sub>:
+
 
 Notes
 ---
