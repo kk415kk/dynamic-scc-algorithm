@@ -18,7 +18,7 @@ For the graph sequence G<sub>0</sub>, ..., G<sub>t</sub>, each of the correspond
 
 The components of the sequence of versions of graphs can naturally be represented in a hierarchy, as a <b>forest</b>. Each node in the forest will represent a strongly connected component of the graph, with no duplications. The leaves of the forest are the vertices of the graph, which are components of the empty graph G<sub>0</sub>. The parent of a component `w` in the forest is the smallest component that strictly contains `w`. For each component `w`, we assign a version number that corresponds to the index `i` of the first graph G<sub>i</sub> in the sequence in which `w` is found to be a component.
 
-The algorithm maintains the component forest of the sequence of versions of graphs. Strong connectivity queries can be reduced to LCA queries on the forest.
+The algorithm maintains the component forest of the sequence of versions of graphs. Strong connectivity queries can be reduced to LCA queries on the forest (the LCA of any two leaf nodes will determine the smallest SCC they are both in, or if they're not in the same component).
 
 
 Supported Operations (in general terms):
