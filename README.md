@@ -45,8 +45,8 @@ Example:
   Edges E1: (A,B), (B,C), (C,A), (B,D)
   A --------> B ----> D
     <-- C <--
-
-
+</pre>
+<pre>
   Suppose an insert(E') occurs, where E' = {(D,C)}
   Graph G2
   Edges E1: (A,B), (B,C), (C,A), (B,D), (D,C)
