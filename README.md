@@ -54,7 +54,10 @@ Example:
    \--- C ---/       /
         \-----------/
 
-  The edge (B,D) bridged the component {A, B, C} to the component {D} and was an inter-component edge in G1. (D,C) was an inserted edge and was not present in G1. The insertion of (D,C) created a new super-component {A, B, C, D}. Therefore, the dynamic edge set H2 is {(B,D), (D,C)}, satisfying the criteria discussed above.
+  The edge (B,D) bridged the component {A, B, C} to the component {D} and was an inter-component edge 
+  in G1. (D,C) was an inserted edge and was not present in G1. The insertion of (D,C) created a new su
+  -per-component {A, B, C, D}. Therefore, the dynamic edge set H2 is {(B,D), (D,C)}, satisfying the cr
+  -iteria discussed above.
 </pre>
 
 
