@@ -9,9 +9,9 @@ Overview
 ---
 Supported Operations:
 
-<code>Insert(E')</code> - Create a new version of the graph, initially identical to the latest version of the graph, and add the set of edges <code>E'</code> to it
-<code>Delete(E')</code> - Delete the set of edges <code>E'</code> from <i>all</i> versions of the graph
-<code>Query(u, v, i)</code> - Check if <code>u, v</code> are in the same SCC of the <i>i</i>th version of the graph
+* <code>Insert(E')</code> - Create a new version of the graph, initially identical to the latest version of the graph, and add the set of edges <code>E'</code> to it
+* <code>Delete(E')</code> - Delete the set of edges <code>E'</code> from <i>all</i> versions of the graph
+* <code>Query(u, v, i)</code> - Check if <code>u, v</code> are in the same SCC of the <i>i</i>th version of the graph
 
 Notes
 ---
