@@ -7,7 +7,7 @@ Research in-progress as part of prototyping work for [LogicBlox](http://www.logi
 
 Overview
 ---
-<pre>Insert(E')</pre> - Create a new version of the graph, initially identical to the latest version of the graph, and add the set of edges <pre>E'</pre> to it
+<code>Insert(E')</code> - Create a new version of the graph, initially identical to the latest version of the graph, and add the set of edges <pre>E'</pre> to it
 
 
 Notes
