@@ -41,8 +41,20 @@ Another way to think of it is that H<sub>i</sub> is composed from all edges that
 
 Example:
 <pre>
-  A ----> B ----> D
-  \-> C -/
+  Graph G1
+  Edges E1: (A,B), (B,C), (C,A), (B,D)
+  A --------> B ----> D
+  \<-- C <--/
+
+  Suppose an insert(E') occurs, where E' = {(D,C)}
+  Graph G2
+  Edges E1: (A,B), (B,C), (C,A), (B,D), (D,C)
+  A --------> B ----> D
+  \<-- C <--/        /
+        \---<-------/
+
+  The edge (B,D) bridged the component {A, B, C} to the component {D} and was an inter-component edge in G1. (D,C) was an inserted edge and was not present in G1. The insertion of (D,C) created a new super-component {A, B, C, D}. Therefore, the dynamic edge set H2 is {(B,D), (D,C)}, satisfying the criteria discussed above.
+
 </pre>
 
 
