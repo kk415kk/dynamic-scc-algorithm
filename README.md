@@ -10,9 +10,11 @@ Research in-progress as part of prototyping work for [LogicBlox](http://www.logi
 
 Overview
 ---
-The algorithm maintains the strongly connected components (SCCs) of a sequence of graphs G<sub>1</sub>, ..., G<sub>t</sub>, where `t` is the number of insert operations performed so far. Basically, G<sub>i</sub> = (V,E<sub>i</sub>) is the graph created by the i<sup>th</sup> insert operation. Assume that G<sub>0</sub> = (V, E<sub>0</sub>), the initial graph, is a graph with no edges, i.e., E<sub>0</sub> is the empty set.
+Disclaimer: the terms "component" and "strongly connected component" will be used interchangeably in the description below. Note that they both refer to a strongly connected component (SCC).
 
-For the graph sequence G<sub>0</sub>, ..., G<sub>t</sub>, each of the corresponding set of edges edges E<sub>0</sub>, ..., E<sub>t</sub> are subsets of each other, in that sequence, i.e. E<sub>0</sub> is a strict subset of E<sub>1</sub>.
+The algorithm maintains the strongly connected components of a sequence of graphs G<sub>1</sub>, ..., G<sub>t</sub>, where `t` is the number of insert operations performed so far. Basically, G<sub>i</sub> = (V,E<sub>i</sub>) is the graph created by the i<sup>th</sup> insert operation. Assume that G<sub>0</sub> = (V, E<sub>0</sub>), the initial graph, is a graph with no edges, i.e., E<sub>0</sub> is the empty set.
+
+For the graph sequence G<sub>0</sub>, ..., G<sub>t</sub>, each of the corresponding set of edges edges E<sub>0</sub>, ..., E<sub>t</sub> are subsets of each other, in that sequence, i.e. E<sub>0</sub> is a strict subset of E<sub>1</sub>. Hence, each component of G<sub>i</sub> is either a component of G<sub>i-1</sub> or a union of some subset of components of G<u>i-1</u> (remember, single nodes are their own strongly connected components).
 
 Supported Operations:
 
