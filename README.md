@@ -7,7 +7,7 @@ Research in-progress as part of prototyping work for [LogicBlox](http://www.logi
 
 Overview
 ---
-The algorithm maintains the strongly connected components (SCCs) of a sequence of graphs G<sub>1</sub>, ..., G<sub>t</sub>, where `t` is the number of insert operations performed so far. 
+The algorithm maintains the strongly connected components (SCCs) of a sequence of graphs G<sub>1</sub>, ..., G<sub>t</sub>, where `t` is the number of insert operations performed so far. Basically, G_i = `(V,E_i)` 
 
 Supported Operations:
 
