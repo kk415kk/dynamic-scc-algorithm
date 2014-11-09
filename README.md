@@ -9,6 +9,8 @@ Overview
 ---
 The algorithm maintains the strongly connected components (SCCs) of a sequence of graphs G<sub>1</sub>, ..., G<sub>t</sub>, where `t` is the number of insert operations performed so far. Basically, G<sub>i</sub> = (V,E<sub>i</sub>) is the graph created by the i<sup>th</sup> insert operation. Assume that G<sub>0</sub> = (V, E<sub>0</sub>), the initial graph, is a graph with no edges, i.e., E<sub>0</sub> is the empty set.
 
+For the graph sequence G<sub>0</sub>, ..., G<sub>t</sub>, each of the corresponding set of edges edges E<sub>0</sub>, ..., E<sub>t</sub> are subsets of each other, in that sequence, i.e. E<sub>0</sub> is a strict subset of E<sub>1</sub>.
+
 Supported Operations:
 
 * `Insert(E')` - Create a new version of the graph, initially identical to the latest version of the graph, and add the set of edges `E'` to it
