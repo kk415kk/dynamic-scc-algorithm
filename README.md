@@ -61,7 +61,7 @@ Example:
 </pre>
 
 Some important observations can be made from this:
-* E<sub>t</sub> = U<sup></sup>t+1<sub>i = 1</sub> H<sub>i</sub>
+* E<sub>t</sub> = U<sup>t+1</sup><sub>i = 1</sub> H<sub>i</sub>
 
 Notes
 ---
