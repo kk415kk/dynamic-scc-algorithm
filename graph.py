@@ -139,8 +139,11 @@ def DynamicGraph():
   to maintain the components of the graph.
   """
   def __init__(self):
+    """
+    Note: all nodes will be a key in self.parent and self.version
+    """
     self.t = 0              # The version of the graph we're currently on
-    self.dynamic_set = []   # H (dynamic edge set), where the i-th set is H_i
+    self.dynamic_set = {}   # H (dynamic edge set), where the i-th set is H_i
     self.parent = {}        # (key, val) -> (node, parent)
     self.version = {}       # The graph version where each node first appeared
 
@@ -149,6 +152,10 @@ def DynamicGraph():
     @param edge_set: a set of edges to be inserted
     If there are new nodes, they must be added to every version of the graph.
     """
+    self.t += 1
+    self.__populate_nodes(edge_set)
+    self.dynamic_set[t] = self.dynamic_set[t] & edge_set
+
     pass
 
   def delete(self, edge_set):
@@ -162,7 +169,37 @@ def DynamicGraph():
     @param u, v: two nodes
     @param i: the version of the graph to query
     """
+    # return version[LCA(u,v)] <= 1
     pass
+
+  def __find_scc(self, dynamic_edge_set, i):
+    """
+    """
+    pass
+
+  def __populate_nodes(self, edge_set):
+    """
+    Used for keeping track of nodes that were not previously in the graph
+    @param edge_set: the set of edges to look at for nodes to add to dictionaries
+    """
+    for edge in edge_set:
+      s_node, e_node = edge.nodes
+      if s_node not in self.parent:
+        self.parent[s_node] = s_node
+        self.version[s_node] = self.t
+      if e_node not in self.parent:
+        self.parent[e_node] = e_node
+        self.version[e_node] = self.t
+
+  def __find(self, node):
+    """
+    Path compression optimization is not used because we need to 
+    keep the structure of trees
+    @param u: a node in the forest
+    @return the root node of the tree that node u is part of
+    """
+    parent = self.parent[node]
+    return parent if parent == node else self.find(parent)
 
 
 def test():
