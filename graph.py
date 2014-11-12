@@ -137,6 +137,9 @@ def DynamicGraph():
   """
   An implementation of a graph that uses Roditty and Zwick's dynamic SCC algorithm
   to maintain the components of the graph.
+
+  Maintain the components forest of the graph as a disjoint set, where the rank of
+  a node is the version of the graph the node first appears in.
   """
   def __init__(self):
     self.t = 0              # The version of the graph we're currently on
@@ -162,6 +165,15 @@ def DynamicGraph():
     @param u, v: two nodes
     @param i: the version of the graph to query
     """
+    pass
+
+  def __find(self, node):
+    """
+    @return
+    """
+    pass
+
+  def __union(self, u, v):
     pass
 
 
