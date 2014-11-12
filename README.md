@@ -60,8 +60,6 @@ Example:
   is {(B,D), (D,C)}, satisfying the criteria discussed above.
 </pre>
 
-Some important observations can be made from this:
-* E<sub>t</sub> = U<sup>t+1</sup><sub>i = 1</sub> H<sub>i</sub>
 
 Notes
 ---

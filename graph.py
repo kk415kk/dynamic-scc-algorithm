@@ -133,6 +133,38 @@ class Graph:
         graph_str += ("[%s %s]\n" % (str(s_node), str(n)))
     return graph_str
 
+def DynamicGraph():
+  """
+  An implementation of a graph that uses Roditty and Zwick's dynamic SCC algorithm
+  to maintain the components of the graph.
+  """
+  def __init__(self):
+    self.t = 0              # The version of the graph we're currently on
+    self.dynamic_set = []   # H (dynamic edge set), where the i-th set is H_i
+    self.parent = {}        # (key, val) -> (node, parent)
+    self.version = {}       # The graph version where each node first appeared
+
+  def insert(self, edge_set):
+    """
+    @param edge_set: a set of edges to be inserted
+    If there are new nodes, they must be added to every version of the graph.
+    """
+    pass
+
+  def delete(self, edge_set):
+    """
+    @param edge_set: a set of edges to be deleted
+    """
+    pass
+
+  def query(self, u, v, i):
+    """
+    @param u, v: two nodes
+    @param i: the version of the graph to query
+    """
+    pass
+
+
 def test():
   a = Node('A')
   b = Node('B')
