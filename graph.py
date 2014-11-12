@@ -35,10 +35,17 @@ class Graph:
   """
   Class to represent a DIRECTED graph using linear space
   """
-  def __init__(self):
+  def __init__(self, edges=[]):
+    """
+    @param edges: optional input set or list of edges to be inserted
+    """
     self.edges = {}	        # Maps node to list of forward neighbors
     self.rev_edges = {}         # Maps node to list of backwards neighbors
     self.components = {}	# Strong components of graph
+
+    # Initialize graph, if desired
+    for edge in edges:
+      self.add_edge(edge)
 
   def add_edge(self, edge):
     """
@@ -90,6 +97,7 @@ class Graph:
     """
     Computes the SCCs of this graph
     O(|E|) time to iterate through each edge
+    @return a dictionary mapping component number to component nodes
     """
     s_nodes = self.edges.keys()
     lowlinks, indices, index = {}, {}, [0]
@@ -124,7 +132,6 @@ class Graph:
         c_node = visited.pop()
         components[lowlink].add(c_node)
 
-
   def __str__(self):
     graph_str = ""
     for s_node in self.edges:
@@ -133,7 +140,7 @@ class Graph:
         graph_str += ("[%s %s]\n" % (str(s_node), str(n)))
     return graph_str
 
-def DynamicGraph():
+class DynamicGraph():
   """
   An implementation of a graph that uses Roditty and Zwick's dynamic SCC algorithm
   to maintain the components of the graph.
@@ -142,17 +149,33 @@ def DynamicGraph():
   a node is the version of the graph the node first appears in.
   """
   def __init__(self):
-    self.t = 0              # The version of the graph we're currently on
-    self.dynamic_set = []   # H (dynamic edge set), where the i-th set is H_i
+    """
+    Note: all nodes will be a key in self.parent and self.version
+    """
+    self.t = 0              # t represents the version of the graph that is most recently represented
+    self.dynamic_set = { 0: set(), 1: set() }   # H (dynamic edge set), where the i-th set is H_i
     self.parent = {}        # (key, val) -> (node, parent)
     self.version = {}       # The graph version where each node first appeared
+
+  def __str__(self):
+    graph_str = ""
+    for time_set in self.dynamic_set.values():
+      for edge in time_set:
+        s_node, e_node = edge.nodes
+        graph_str += "[%s %s]\n" % (str(s_node), str(e_node))
+    return graph_str if graph_str != "" else "Empty graph"
 
   def insert(self, edge_set):
     """
     @param edge_set: a set of edges to be inserted
     If there are new nodes, they must be added to every version of the graph.
     """
-    pass
+    self.t += 1
+    self.__populate_nodes(edge_set)
+    self.dynamic_set[self.t] = self.dynamic_set[self.t] & edge_set
+    self.__find_scc(self.dynamic_set[self.t])
+    self.dynamic_set[self.t+1] = set()
+    self.__shift(self.dynamic_set[self.t], self.dynamic_set[self.t+1])
 
   def delete(self, edge_set):
     """
@@ -165,19 +188,86 @@ def DynamicGraph():
     @param u, v: two nodes
     @param i: the version of the graph to query
     """
+    # return version[LCA(u,v)] <= 1
     pass
+
+  def get_nodes(self):
+    """
+    @return a set of all the nodes in the graph
+    """
+    return self.parent.keys()
+
+  def __find_scc(self, dynamic_edge_set):
+    """
+    """
+    temp_dynamic_edge_set = set()
+    for edge in dynamic_edge_set:
+      s_node, e_node = edge.nodes
+      temp_edge = (self.__find(s_node), self.__find(e_node))
+      temp_dynamic_edge_set.add(temp_edge)
+    
+    subgraph = self.__construct_subgraph(temp_dynamic_edge_set)
+    components = subgraph.compute_scc()
+    for scc in components:
+      component_nodes = components[scc]
+      if len(component_nodes) > 1:
+        scc_node = Node()
+        self.version[scc_node] = self.t
+        for j in xrange(len(component_nodes)):
+          # union step here?
+          self.parent[component_nodes[j]] = scc_node
+      
+  def __construct_subgraph(self, edge_set):
+    """
+    Builds a graph out of the set of edges and returns it
+    @param edge_set
+    @return a Graph object
+    """
+    return Graph(edge_set)
+
+  def __shift(self, dynamic_edge_set_1, dynamic_edge_set_2):
+    for edge_1 in dynamic_edge_set_1:
+      s_node, e_node = edge_1.nodes
+      if self.__find(s_node) != self.__find(e_node):
+        dynamic_edge_set_1.remove(edge_1)
+        dynamic_edge_set_2.add(edge_1)
+
+  def __populate_nodes(self, edge_set):
+    """
+    Used for keeping track of nodes that were not previously in the graph
+    @param edge_set: the set of edges to look at for nodes to add to dictionaries
+    """
+    for edge in edge_set:
+      s_node, e_node = edge.nodes
+      if s_node not in self.parent:
+        self.parent[s_node] = s_node
+        self.version[s_node] = self.t
+      if e_node not in self.parent:
+        self.parent[e_node] = e_node
+        self.version[e_node] = self.t
 
   def __find(self, node):
     """
-    @return
+    Path compression optimization is not used because we need to keep the structure of trees
+    @param u: a node in the forest
+    @return the root node of the tree that node u is part of
     """
-    pass
+    parent = self.parent[node]
+    return parent if parent == node else self.find(parent)
 
-  def __union(self, u, v):
-    pass
+G = DynamicGraph()
+a = Node('A')
+b = Node('B')
+c = Node('C')
+e1 = Edge(a,b)
+e2 = Edge(a,c)
+e3 = Edge(c,a)
+edge_set = set([e1])
 
+G.insert(edge_set)
+print str(G)
 
-def test():
+def test_graph():
   a = Node('A')
   b = Node('B')
   c = Node('C')
