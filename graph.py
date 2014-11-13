@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # See https://wiki.python.org/moin/TimeComplexity for running times
 class Node:
   """
@@ -182,12 +183,22 @@ class DynamicGraph():
     self.__find_scc(self.dynamic_set[self.t])
     self.dynamic_set[self.t+1] = set()
     self.__shift(self.dynamic_set[self.t], self.dynamic_set[self.t+1])
+    # TODO: Pre-process for LCA queries
 
   def delete(self, edge_set):
     """
     @param edge_set: a set of edges to be deleted
     """
-    pass
+    self.parent = dict((node, node) for node in self.parent)  # Set all parent nodes to themselves
+
+    # Recompute the strong components using our dynamic edge partitions
+    for i in xrange(1, self.t):
+      self.dynamic_set[i] = self.dynamic_set[i] - edge_set
+      self.__find_scc(self.dynamic_set[i])
+      self.__shift(self.dynamic_set[i], self.dynamic_set[i+1])
+
+    self.dynamic_set[self.t+1] = self.dynamic_set[self.t+1] - edge_set
+    # TODO: Pre-process for LCA queries
 
   def query(self, u, v, i):
     """
@@ -233,8 +244,6 @@ class DynamicGraph():
           # union step here?
           self.parent[node] = scc_node
 
-    # TODO: Pre-process the new graph for LCA queries
-      
   def __construct_subgraph(self, edge_set):
     """
     Builds a graph out of the set of edges and returns it
