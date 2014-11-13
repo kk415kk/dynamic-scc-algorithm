@@ -3,11 +3,14 @@ class Node:
   """
   Class to represent a node
   """
-  def __init__(self, value):
+  def __init__(self, value=None):
     self.value = value
 
   def __eq__(self, other):
     return self is other
+
+  def __repr__(self):
+    return '<Node %s @%s>' % (str(self.value), str(hex(id(self))))
 
   def __hash__(self):
     return hash(repr(self))
@@ -24,6 +27,9 @@ class Edge:
 
   def __eq__(self, other):
     return self.nodes[0] == other.nodes[0] and self.nodes[1] == other.nodes[1]
+
+  def __repr__(self):
+    return '[%s %s @%s]' % (str(self.nodes[0]), str(self.nodes[1]), str(hex(id(self))))
 
   def __hash__(self):
     return hash(repr(self))
@@ -172,7 +178,7 @@ class DynamicGraph():
     """
     self.t += 1
     self.__populate_nodes(edge_set)
-    self.dynamic_set[self.t] = self.dynamic_set[self.t] & edge_set
+    self.dynamic_set[self.t] = self.dynamic_set[self.t] | edge_set
     self.__find_scc(self.dynamic_set[self.t])
     self.dynamic_set[self.t+1] = set()
     self.__shift(self.dynamic_set[self.t], self.dynamic_set[self.t+1])
@@ -203,19 +209,21 @@ class DynamicGraph():
     temp_dynamic_edge_set = set()
     for edge in dynamic_edge_set:
       s_node, e_node = edge.nodes
-      temp_edge = (self.__find(s_node), self.__find(e_node))
+      temp_edge = Edge(self.__find(s_node), self.__find(e_node))
       temp_dynamic_edge_set.add(temp_edge)
     
     subgraph = self.__construct_subgraph(temp_dynamic_edge_set)
     components = subgraph.compute_scc()
     for scc in components:
       component_nodes = components[scc]
+      component_values = [node.value for node in component_nodes]
       if len(component_nodes) > 1:
-        scc_node = Node()
+        scc_node = Node(component_values)
+        self.parent[scc_node] = scc_node
         self.version[scc_node] = self.t
-        for j in xrange(len(component_nodes)):
+        for node in component_nodes:
           # union step here?
-          self.parent[component_nodes[j]] = scc_node
+          self.parent[node] = scc_node
       
   def __construct_subgraph(self, edge_set):
     """
@@ -226,11 +234,14 @@ class DynamicGraph():
     return Graph(edge_set)
 
   def __shift(self, dynamic_edge_set_1, dynamic_edge_set_2):
+    edges_to_remove = set()
     for edge_1 in dynamic_edge_set_1:
       s_node, e_node = edge_1.nodes
       if self.__find(s_node) != self.__find(e_node):
-        dynamic_edge_set_1.remove(edge_1)
+        edges_to_remove.add(edge_1)
         dynamic_edge_set_2.add(edge_1)
+    for edge in edges_to_remove:
+      dynamic_edge_set_1.remove(edge)
 
   def __populate_nodes(self, edge_set):
     """
@@ -253,7 +264,13 @@ class DynamicGraph():
     @return the root node of the tree that node u is part of
     """
     parent = self.parent[node]
-    return parent if parent == node else self.find(parent)
+    return parent if parent == node else self.__find(parent)
+
+def print_graph(G):
+  print str(G)
+  print "Parents: %s\n" % G.parent
+  print "Versions: %s\n" % G.version
+  print "H: %s\n" % G.dynamic_set
 
 G = DynamicGraph()
 a = Node('A')
@@ -262,10 +279,10 @@ c = Node('C')
 e1 = Edge(a,b)
 e2 = Edge(a,c)
 e3 = Edge(c,a)
-edge_set = set([e1])
+edge_set = set([e1, e2, e3])
 
 G.insert(edge_set)
-print str(G)
+print_graph(G)
 
 def test_graph():
   a = Node('A')
