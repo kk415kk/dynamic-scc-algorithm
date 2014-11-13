@@ -272,19 +272,20 @@ def print_graph(G):
   print "Versions: %s\n" % G.version
   print "H: %s\n" % G.dynamic_set
 
-G = DynamicGraph()
-a = Node('A')
-b = Node('B')
-c = Node('C')
-e1 = Edge(a,b)
-e2 = Edge(a,c)
-e3 = Edge(c,a)
-e4 = Edge(b,c)
-edge_set = set([e1, e2, e3])
-G.insert(edge_set)
-print_graph(G)
-G.insert(set([e4]))
-print_graph(G)
+def test_dynamic_graph():
+  G = DynamicGraph()
+  a = Node('A')
+  b = Node('B')
+  c = Node('C')
+  e1 = Edge(a,b)
+  e2 = Edge(a,c)
+  e3 = Edge(c,a)
+  e4 = Edge(b,c)
+  edge_set = set([e1, e2, e3])
+  G.insert(edge_set)
+  print_graph(G)
+  G.insert(set([e4]))
+  print_graph(G)
 
 def test_graph():
   a = Node('A')
