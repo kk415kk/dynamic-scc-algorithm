@@ -205,13 +205,21 @@ class DynamicGraph():
 
   def __find_scc(self, dynamic_edge_set):
     """
+    1. Create a temporary dynamic edge set using the component nodes instead
+        of the actual nodes
+    2. Construct a subgraph using these new edges and find their SCCs
+    3. Add pointers from the component nodes to their new SCC node(s)
+    4. Pre-process the new graph for fast LCA queries
+    @param dynamic_edge_set: a dynamic edge set of the current time step
     """
+    # Create a temporary dynamic edge set
     temp_dynamic_edge_set = set()
     for edge in dynamic_edge_set:
       s_node, e_node = edge.nodes
       temp_edge = Edge(self.__find(s_node), self.__find(e_node))
       temp_dynamic_edge_set.add(temp_edge)
-    
+
+    # Construct a subgraph out of the edges in the dynamic edge set and find SCCs
     subgraph = self.__construct_subgraph(temp_dynamic_edge_set)
     components = subgraph.compute_scc()
     for scc in components:
@@ -224,6 +232,8 @@ class DynamicGraph():
         for node in component_nodes:
           # union step here?
           self.parent[node] = scc_node
+
+    # TODO: Pre-process the new graph for LCA queries
       
   def __construct_subgraph(self, edge_set):
     """
@@ -234,6 +244,12 @@ class DynamicGraph():
     return Graph(edge_set)
 
   def __shift(self, dynamic_edge_set_1, dynamic_edge_set_2):
+    """
+    Essentially, we want to move the edges in the first edge set into the second
+    if the edge's nodes are not part of the same SCC (an inter-component edge)
+    @param dynamic_edge_set_1: the dynamic edge set for the current time step
+    @param dynamic_edge_set_2: the dynamic edge set for the next time step
+    """
     edges_to_remove = set()
     for edge_1 in dynamic_edge_set_1:
       s_node, e_node = edge_1.nodes
