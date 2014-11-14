@@ -10,15 +10,18 @@ Research in-progress as part of prototyping work for [LogicBlox](http://www.logi
 Documentation
 ---
 __Class `Node`__
+A class to represent a node in a graph.
 * `__init__(self, value=None)`
   * `@param value`: any object
 
 __Class `Edge`__
+A class to represent an edge in a graph.
 * `__init__(self, s_node, e_node)`
   * `@param s_node`: the start node of the edge (the tail)
   * `@param e_node`: the end node of the edge (the head)
 
 __Class `Graph`__
+A class to represent a directed graph. The graph maintains reverse edges as well, so it can easily be used to represent an undirected graph. Contains the ability to calculate the strong components of the graph.
 * `__init__(self, edges=[])`
   * `@param edges`: [optional] a set of edges to instantiate the graph with
 * `add_edge(self, edge)`
@@ -31,10 +34,11 @@ __Class `Graph`__
   * `@return` a dictionary mapping SCC numbers to a set of nodes in the SCC
 
 __Class `DynamicGraph`__
+A more complex version of a graph, with a vastly different implementation. This graph supports optimized SCC computations under dynamic edge additions/deletions.
 * `__init__(self)`
-* `__insert__(self, edge_set)`
+* `insert(self, edge_set)`
   * `@param edge_set`: a <u>set</u> of `Edge` objects
-* `__delete__(self, edge_set)`
+* `delete(self, edge_set)`
   * `@param edge_set`: a <u>set</u> of `Edge` objects
 * `get_nodes(self)`
   * `@return` a set of `Node` objects

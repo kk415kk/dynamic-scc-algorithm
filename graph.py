@@ -204,8 +204,15 @@ class DynamicGraph():
       if node in self.parent.keys())
     # TODO: Pre-process for LCA queries
 
+  def compute_scc(self):
+    """
+    @return a dictionary of the strong components of the graph
+    """
+    pass
+
   def query(self, u, v, i):
     """
+    Currently takes O(h) time, where h = max(height(tree(u)), height(tree(v)))
     @param u, v: two nodes
     @param i: the version of the graph to query
     """
@@ -217,6 +224,12 @@ class DynamicGraph():
     @return a set of all the nodes in the graph
     """
     return self.nodes
+
+  def __lca(self, u, v):
+    """
+    @param u, v
+    """
+    pass
 
   def __find_scc(self, dynamic_edge_set):
     """
