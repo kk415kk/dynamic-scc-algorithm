@@ -30,10 +30,9 @@ e6 = LB.Edge(d,c)
 e7 = LB.Edge(e,f)
 e8 = LB.Edge(f,e)
 
-edge_set = set([e1, e2, e3])
+edge_set = set([e1, e3, e4])
 
 G.insert(edge_set)
-G.insert(set([e4]))
 G.insert(set([e5]))
 G.insert(set([e6]))
 G.insert(set([e7]))
