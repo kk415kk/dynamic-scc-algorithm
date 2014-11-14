@@ -1,11 +1,39 @@
 # See https://wiki.python.org/moin/TimeComplexity for running times
 class Node:
   """
-  Class to represent a node
+  Class to represent a node. A node represents its own strongly connected component;
+  its children are nodes that are part of the SCC that it represents.
   """
   def __init__(self, value=None):
     self.value = value
+    self.child_nodes = set([self])
 
+  def add_children(self, node_set):
+    """
+    Populates this node's child nodes (the nodes that are part of this SCC) 
+    @param node_set: a set of "child" nodes that are in the same SCC as this node
+    """
+    self.child_nodes = self.child_nodes | node_set
+
+  def remove_children(self, node_set):
+    """
+    Removes some subset of nodes from this node's child nodes
+    @param node_set: a set of "child nodes" that are no longer part of the same SCC
+    """
+    self.child_nodes = self.child_nodes - node_set
+
+  def get_leaves(self):
+    """
+    @return the "leaves" of this node (i.e. all the nodes part of this SCC
+    """
+    leaves = set()
+    for node in self.child_nodes:
+      if len(node.child_nodes) > 1 and node != self:
+        leaves = leaves | node.get_leaves()
+      elif len(node.child_nodes) == 1:
+        leaves.add(node)
+    return leaves
+      
   def __eq__(self, other):
     return self is other
 
@@ -206,9 +234,12 @@ class DynamicGraph():
 
   def compute_scc(self):
     """
-    @return a dictionary of the strong components of the graph
+    @return a list of the strong components as sets of nodes of the graph
     """
-    pass
+    nodes = self.__get_forest_nodes()
+    # If the node is at the top of your component tree, get its leaves
+    components = [node.get_leaves() for node in nodes if self.parent[node] == node]
+    return components
 
   def query(self, u, v, i):
     """
@@ -222,9 +253,15 @@ class DynamicGraph():
 
   def get_nodes(self):
     """
-    @return a set of all the nodes in the graph
+    @return a set of all the nodes in the actual graph
     """
     return self.nodes
+  
+  def __get_forest_nodes(self):
+    """
+    @return the set of all nodes in the forest of components
+    """
+    return self.parent.keys()
 
   def __lca(self, u, v):
     """
@@ -267,6 +304,7 @@ class DynamicGraph():
       component_values = [node.value for node in component_nodes]
       if len(component_nodes) > 1:
         scc_node = Node(component_values)
+        scc_node.add_children(component_nodes)
         self.parent[scc_node] = scc_node
         self.version[scc_node] = self.t
         for node in component_nodes:

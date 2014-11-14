@@ -40,5 +40,9 @@ G.insert(set([e8]))
 #LB.print_graph(G)
 #print "----------------------------------------"
 G.delete(set([e6]))
+components =  G.compute_scc()
+for c in components:
+  print c
+  print ""
 #LB.print_graph(G)
 draw_graph(G)

@@ -35,6 +35,15 @@ A class to represent a directed graph. The graph maintains reverse edges as well
 
 __Class `DynamicGraph`__<br>
 A more complex version of a graph, with a vastly different implementation. This graph supports optimized SCC computations under dynamic edge additions/deletions.
+
+`O(n)` space to represent a graph:
+  * At most 2n-1 nodes in the forest representation of the graph
+  * A linear size array for every node in the forest to map nodes to parents
+  * A linear size array for every node in the forest to map nodes to graph versions
+  * A node holds pointers to its "child" nodes in its component tree (linear size overall)
+
+`compute_scc` runs in `O(|V|)` time, since it follows pointers down the component trees only from the root node.
+
 * `__init__(self)`
 * `insert(self, edge_set)`
   * `@param edge_set`: a <u>set</u> of `Edge` objects
@@ -46,6 +55,8 @@ A more complex version of a graph, with a vastly different implementation. This 
   * `@param u, v`: two nodes to query
   * `@param i`: the version of the graph to query (or Graph.t for the latest graph)
   * `@return True if u, v are in the same SCC, False otherwise`
+* `compute_scc(self)`:
+  * `@return` a list of sets of nodes that are in the same component
 
 Visualize
 ---
@@ -102,7 +113,6 @@ Example:
   of (D,C) created a new super-component {A, B, C, D}. Therefore, the dynamic edge set H2 
   is {(B,D), (D,C)}, satisfying the criteria discussed above.
 </pre>
-
 
 Notes
 ---
