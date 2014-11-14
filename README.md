@@ -10,8 +10,13 @@ Research in-progress as part of prototyping work for [LogicBlox](http://www.logi
 Documentation
 ---
 Class `Node`
+* `__init__(self, value=None)`
+  * @param `value` can be any object
 
 Class `Edge`
+* `__init__(self, s_node, e_node)`
+  * @param `s_node`
+  * @param `e_node`
 
 Class `Graph`
 
