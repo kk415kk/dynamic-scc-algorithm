@@ -162,6 +162,7 @@ class DynamicGraph():
     self.dynamic_set = { 0: set(), 1: set() }   # H (dynamic edge set), where the i-th set is H_i
     self.parent = {}        # (key, val) -> (node, parent)
     self.version = {}       # The graph version where each node first appeared
+    self.nodes = set()      # The nodes in the original graph, NOT SCC nodes
 
   def __str__(self):
     graph_str = ""
@@ -176,6 +177,7 @@ class DynamicGraph():
     @param edge_set: a set of edges to be inserted
     If there are new nodes, they must be added to every version of the graph.
     """
+    self.nodes = self.nodes | self.__edge_set_nodes(edge_set)
     self.t += 1
     self.__populate_nodes(edge_set)
     self.dynamic_set[self.t] = self.dynamic_set[self.t] | edge_set
@@ -188,15 +190,18 @@ class DynamicGraph():
     """
     @param edge_set: a set of edges to be deleted
     """
-    self.parent = dict((node, node) for node in self.parent)  # Set all parent nodes to themselves
+    #self.parent = dict((node, node) for node in self.parent)  # Set all parent nodes to themselves
+    self.parent = dict((node, node) for node in self.nodes)
 
     # Recompute the strong components using our dynamic edge partitions
-    for i in xrange(1, self.t):
+    for i in xrange(1, self.t+1):
       self.dynamic_set[i] = self.dynamic_set[i] - edge_set
       self.__find_scc(self.dynamic_set[i])
       self.__shift(self.dynamic_set[i], self.dynamic_set[i+1])
 
     self.dynamic_set[self.t+1] = self.dynamic_set[self.t+1] - edge_set
+    self.version = dict((node, version) for node, version in self.version.items() \
+      if node in self.parent.keys())
     # TODO: Pre-process for LCA queries
 
   def query(self, u, v, i):
@@ -211,7 +216,7 @@ class DynamicGraph():
     """
     @return a set of all the nodes in the graph
     """
-    return self.parent.keys()
+    return self.nodes
 
   def __find_scc(self, dynamic_edge_set):
     """
@@ -289,6 +294,13 @@ class DynamicGraph():
     """
     parent = self.parent[node]
     return parent if parent == node else self.__find(parent)
+
+  def __edge_set_nodes(self, edge_set):
+    nodes = set()
+    for edge in edge_set:
+      nodes.add(edge.nodes[0])
+      nodes.add(edge.nodes[1])
+    return nodes
 
 def print_graph(G):
   print str(G)

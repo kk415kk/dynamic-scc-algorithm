@@ -39,6 +39,7 @@ G.insert(set([e6]))
 G.insert(set([e7]))
 G.insert(set([e8]))
 #LB.print_graph(G)
-#G.delete(set([e6]))
+#print "----------------------------------------"
+G.delete(set([e6]))
 #LB.print_graph(G)
 draw_graph(G)
