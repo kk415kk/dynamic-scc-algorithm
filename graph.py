@@ -22,6 +22,12 @@ class Node:
     """
     self.child_nodes = self.child_nodes - node_set
 
+  def get_children(self):
+    """
+    @return the children of this node
+    """
+    return self.child_nodes
+
   def get_leaves(self):
     """
     @return the "leaves" of this node (i.e. all the nodes part of this SCC
@@ -191,6 +197,7 @@ class DynamicGraph():
     self.parent = {}        # (key, val) -> (node, parent)
     self.version = {}       # The graph version where each node first appeared
     self.nodes = set()      # The nodes in the original graph, NOT SCC nodes
+    self.roots = {}         # The root nodes of component trees in the forest
 
   def __str__(self):
     graph_str = ""
@@ -236,14 +243,15 @@ class DynamicGraph():
     """
     @return a list of the strong components as sets of nodes of the graph
     """
-    nodes = self.__get_forest_nodes()
+    #nodes = self.__get_forest_nodes()
     # If the node is at the top of your component tree, get its leaves
-    components = [node.get_leaves() for node in nodes if self.parent[node] == node]
-    return components
+    #components = [node.get_leaves() for node in nodes if self.parent[node] == node]
+    return self.roots
 
   def query(self, u, v, i):
     """
     Currently takes O(h) time, where h = max(height(tree(u)), height(tree(v)))
+    Need to add pre-processing for querying in faster time
     @param u, v: two nodes
     @param i: the version of the graph to query
     @return True if u, v are in the same SCC in version i of the graph
@@ -297,11 +305,13 @@ class DynamicGraph():
       temp_dynamic_edge_set.add(temp_edge)
 
     # Construct a subgraph out of the edges in the dynamic edge set and find SCCs
+    # These newly constructed SCC nodes will always be root nodes (new/bigger SCCs)
     subgraph = self.__construct_subgraph(temp_dynamic_edge_set)
     components = subgraph.compute_scc()
     for scc in components:
       component_nodes = components[scc]
       component_values = [node.value for node in component_nodes]
+      scc_node = None
       if len(component_nodes) > 1:
         scc_node = Node(component_values)
         scc_node.add_children(component_nodes)
@@ -310,6 +320,19 @@ class DynamicGraph():
         for node in component_nodes:
           # union step here?
           self.parent[node] = scc_node
+      else:
+        scc_node = next(iter(component_nodes))
+      self.__maintain_roots(scc_node, scc_node.get_leaves())
+
+  def __maintain_roots(self, root, children_set):
+    """
+    Adds new "roots" of the forest and removes any that are no longer roots
+    @param root
+    @param children_set
+    """
+    for node in root.get_children():
+      self.roots.pop(node, None)
+    self.roots[root] = children_set
 
   def __construct_subgraph(self, edge_set):
     """
@@ -370,6 +393,9 @@ def print_graph(G):
   print "Parents: %s\n" % G.parent
   print "Versions: %s\n" % G.version
   print "H: %s\n" % G.dynamic_set
+
+def benchmark():
+  pass
 
 def test_dynamic_graph():
   G = DynamicGraph()
