@@ -215,9 +215,10 @@ class DynamicGraph():
     Currently takes O(h) time, where h = max(height(tree(u)), height(tree(v)))
     @param u, v: two nodes
     @param i: the version of the graph to query
+    @return True if u, v are in the same SCC in version i of the graph
     """
-    # return version[LCA(u,v)] <= 1
-    pass
+    lca_node = self.__lca(u, v)
+    return self.version[lca_node] <= i if lca_node in self.version else False
 
   def get_nodes(self):
     """
@@ -227,9 +228,20 @@ class DynamicGraph():
 
   def __lca(self, u, v):
     """
-    @param u, v
+    Finds the LCA of the two nodes u and v
+    @param u, v: the two nodes to find the LCA of
+    @return None if the two nodes are not connected; else return a Node
     """
-    pass
+    traversed = set([u])
+    while self.parent[u] != u:
+      u = self.parent[u]
+      traversed.add(u)
+
+    while self.parent[v] != v:
+      v = self.parent[v]
+      if v in traversed:
+        return v
+    return None if v not in traversed else v
 
   def __find_scc(self, dynamic_edge_set):
     """
