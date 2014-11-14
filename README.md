@@ -42,6 +42,10 @@ A more complex version of a graph, with a vastly different implementation. This 
   * `@param edge_set`: a <u>set</u> of `Edge` objects
 * `get_nodes(self)`
   * `@return` a set of `Node` objects
+* `query(self, u, v, i)`
+  * `@param u, v`: two nodes to query
+  * `@param i`: the version of the graph to query (or Graph.t for the latest graph)
+  * `@return True if u, v are in the same SCC, False otherwise`
 
 Visualize
 ---
