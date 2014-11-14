@@ -388,14 +388,74 @@ class DynamicGraph():
       nodes.add(edge.nodes[1])
     return nodes
 
+import time
+class Timer(object):
+  def __init__(self, verbose=False):
+    self.verbose = verbose
+
+  def __enter__(self):
+    self.start = time.time()
+    return self
+
+  def __exit__(self, *args):
+    self.end = time.time()
+    self.secs = self.end - self.start
+    self.msecs = self.secs * 1000  # millisecs
+    if self.verbose:
+      print 'elapsed time: %f ms' % self.msecs
+
 def print_graph(G):
   print str(G)
   print "Parents: %s\n" % G.parent
   print "Versions: %s\n" % G.version
   print "H: %s\n" % G.dynamic_set
 
-def benchmark():
-  pass
+a = Node('A')
+b = Node('B')
+c = Node('C')
+d = Node('D')
+e = Node('E')
+f = Node('F')
+g = Node('G')
+
+e1 = Edge(a,b)
+e2 = Edge(a,c)
+e3 = Edge(c,a)
+e4 = Edge(b,c)
+e5 = Edge(c,d)
+e6 = Edge(d,c)
+e7 = Edge(e,f)
+e8 = Edge(f,e)
+e9 = Edge(c,g)
+e10 = Edge(b,a)
+e11 = Edge(g,c)
+
+edge_set1 = set([e1, e2, e3, e4])
+edge_set2 = set([e5])
+edge_set3 = set([e6])
+edge_set4 = set([e7])
+edge_set5 = set([e8, e9])
+edge_set6 = set([e10, e11])
+edge_sets = [edge_set1, edge_set2, edge_set3, edge_set4, edge_set5, edge_set6]
+
+def benchmark(edge_set_list):
+  with Timer() as t:
+    G1 = Graph()
+    for edge_set in edge_set_list:
+      for edge in edge_set:
+        G1.add_edge(edge)
+  fsecs = float(t.secs)
+
+  with Timer() as t:
+    G2 = DynamicGraph()
+    for edge_set in edge_set_list:
+      G2.insert(edge_set)
+  ssecs = float(t.secs)
+  print "Tarjan completed in %s s" % fsecs
+  print "Roddity completed in %s s" % ssecs
+  print "Tarjan is %sx faster than Roddity." % (1.0/(fsecs/ssecs))
+
+benchmark(edge_sets)
 
 def test_dynamic_graph():
   G = DynamicGraph()
