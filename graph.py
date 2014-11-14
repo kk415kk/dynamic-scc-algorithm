@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # See https://wiki.python.org/moin/TimeComplexity for running times
 class Node:
   """

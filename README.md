@@ -7,6 +7,16 @@ Fully Dynamic SCC Maintenance Algorithm
 ----
 Research in-progress as part of prototyping work for [LogicBlox](http://www.logicblox.com), based off of [Roditty and Zwick's paper](http://dl.acm.org/citation.cfm?id=1007387&dl=ACM&coll=DL&CFID=446154922&CFTOKEN=78521305). Some of the explanations below may be drawn directly from the paper.
 
+Documentation
+---
+Class `Node`
+
+Class `Edge`
+
+Class `Graph`
+
+Class `DynamicGraph`
+
 Visualize
 ---
 Run `sudo pip install pydot` to install the Python dot interface for visualizing the graph. 
