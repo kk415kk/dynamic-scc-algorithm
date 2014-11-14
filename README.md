@@ -9,18 +9,35 @@ Research in-progress as part of prototyping work for [LogicBlox](http://www.logi
 
 Documentation
 ---
-Class `Node`
+__Class `Node`__
 * `__init__(self, value=None)`
-  * @param `value` can be any object
+  * `@param value`: any object
 
-Class `Edge`
+__Class `Edge`__
 * `__init__(self, s_node, e_node)`
-  * @param `s_node`
-  * @param `e_node`
+  * `@param s_node`: the start node of the edge (the tail)
+  * `@param e_node`: the end node of the edge (the head)
 
-Class `Graph`
+__Class `Graph`__
+* `__init__(self, edges=[])`
+  * `@param edges`: [optional] a set of edges to instantiate the graph with
+* `add_edge(self, edge)`
+  * `@param edge`: an `Edge` object
+* `removed_edge(self, edge)`
+  * `@param edge`: an `Edge` object
+* `get_nodes(self)`
+  * `@return` a set of `Node` objects
+* `compute_scc(self)`
+  * `@return` a dictionary mapping SCC numbers to a set of nodes in the SCC
 
-Class `DynamicGraph`
+__Class `DynamicGraph`__
+* `__init__(self)`
+* `__insert__(self, edge_set)`
+  * `@param edge_set`: a <u>set</u> of `Edge` objects
+* `__delete__(self, edge_set)`
+  * `@param edge_set`: a <u>set</u> of `Edge` objects
+* `get_nodes(self)`
+  * `@return` a set of `Node` objects
 
 Visualize
 ---
