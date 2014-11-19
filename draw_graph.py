@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import pydot
-import graph as LB
+import rz_graph as LB
 
 # Draw the graph and generate
 def draw_graph(G, name='output_graph'):
