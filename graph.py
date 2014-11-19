@@ -6,7 +6,8 @@ class Node:
   """
   def __init__(self, value=None):
     self.value = value
-      
+    self.component_edges = {}
+
   def __eq__(self, other):
     return self is other
 
@@ -49,6 +50,7 @@ class Graph:
     self.edges = {}	        # Maps node to list of forward neighbors
     self.rev_edges = {}         # Maps node to list of backwards neighbors
     self.components = {}	# Strong components of graph
+    self.inverse_components = {}# Maps each node to its component in the graph
 
     # Initialize graph, if desired
     for edge in edges:
@@ -66,7 +68,13 @@ class Graph:
       self.rev_edges[e_node] = set()
     self.edges[s_node].add(e_node)
     self.rev_edges[e_node].add(s_node)
-    
+
+  def add_edges(self, edge_set):
+    """
+    Add multiple edges at once
+    """
+    for edge in edge_set:
+      self.add_edge(edge)
 
   def remove_edge(self, edge):
     """
@@ -94,6 +102,13 @@ class Graph:
         if e_node in self.edges and len(self.edges[e_node]) == 0:
           del self.edges[e_node]
 
+  def remove_edges(self, edges):
+    """
+    Remove multiple edges at once
+    """
+    for edge in edges:
+      self.remove_edge(edge)
+
   def get_nodes(self):
     """
     O(|V|) time to retrieve all nodes in the graph
@@ -103,19 +118,21 @@ class Graph:
   def compute_scc(self):
     """
     Computes the SCCs of this graph
-    O(|E|) time to iterate through each edge
+    O(|V|+|E|) time, based on Tarjan's algorithm
     @return a dictionary mapping component number to component nodes
     """
     s_nodes = self.edges.keys()
     lowlinks, indices, index = {}, {}, [0]
-    components = {}
+    components, inverse_components = {}, {}
     visited = []
     for s_node in s_nodes:
       if s_node not in indices:
-        self.__traverse(s_node, lowlinks, indices, index, components, visited)
-    return components
+        self.__traverse(s_node, lowlinks, indices, index, components, inverse_components, visited)
+    self.components = components
+    self.inverse_components = inverse_components
+    return components, inverse_components
 
-  def __traverse(self, node, lowlinks, indices, index, components, visited):
+  def __traverse(self, node, lowlinks, indices, index, components, inverse_components, visited):
     """
     Private helper function to perform DFS and compute components
     of graph (final components in lowlinks)
@@ -126,7 +143,7 @@ class Graph:
     if node in self.edges:
       for e_node in self.edges[node]:
         if e_node not in indices:
-          self.__traverse(e_node, lowlinks, indices, index, components, visited)
+          self.__traverse(e_node, lowlinks, indices, index, components, inverse_components, visited)
           lowlinks[node] = min(lowlinks[node], lowlinks[e_node])
         else:
           lowlinks[node] = min(lowlinks[node], indices[e_node])
@@ -137,6 +154,7 @@ class Graph:
       c_node = None 
       while len(visited) > 0 and c_node != node:
         c_node = visited.pop()
+        inverse_components[c_node] = lowlink
         components[lowlink].add(c_node)
 
   def __str__(self):
