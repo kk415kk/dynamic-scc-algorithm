@@ -48,6 +48,8 @@ class Graph:
     @param edges: optional input set or list of edges to be inserted
     """
     self.edges = {}	              # Maps node to list of forward neighbors
+    self.inter_edges = {}         # Maps node to a list of neighbors that are NOT in its SCC
+    self.intra_edges = {}         # Maps node to a list of neighbors that are in its SCC
     self.components = {}	        # Strong components of graph
     self.inverse_components = {}  # Maps each node to its component in the graph
     self.i = 0                    # An integer for component numbers
