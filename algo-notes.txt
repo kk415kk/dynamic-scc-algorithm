@@ -5,42 +5,24 @@ G contains:
   - a mapping of SCC to nodes --> SCC
   - a mapping of node to SCC ---> inverse_SCC
 
-
 def remove_edges(E'):
-  check_edges = {}
-  check_nodes = {}
+  check_scc = set()
 
   for (A,B) in E':
-    delete (A,B) from E, and from A's outgoing edges in the SCC
-    if SCC(A) == SCC(B) and (number of outgoing edges for A that are in the SCC == 0):
-      check_edges[SCC(A)].add((A,B))
-      check_nodes[SCC(A)].add(A)
-      check_nodes[SCC(A)].add(B)
+    delete (A,B) from E
+    if SCC(A) == SCC(B):
+      check_scc.add(SCC(A))
+      delete (A,B) from A's intracomponent edges
+    else:
+      delete (A,B) from A's intercomponent edges
 
   # Go through all the SCCs that are affected
   for scc in check_edges:
-    edges = check_edges[scc]
-    nodes = check_nodes[scc]
-    skip_edges = set()
+    run tarjan's algorithm on the scc in question, only considering nodes/edges within the scc
 
-    # For each deleted edge in the SCC
-    for (A,B) in edges:
-
-      # If the edge cannot be skipped
-      if (A,B) not in skip_edges:
-
-        # Traverse the SCC starting from A
-        visited_nodes = traverse_scc(A)
-
-        # If B can be reached from A still, we still have an SCC
-        # We can skip all edges that we deleted where we can still reach C 
-        if B in visited_nodes:
-          for (C,D) in edges:
-            if C in visited_nodes:
-              skip_edges.add((C,D))
-          
-
-
+--------
+  ADD: E' = { (A,B) in E }, G = (V,E) 
+--------
 
 
 
