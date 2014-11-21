@@ -48,9 +48,9 @@ class Graph:
     @param edges: optional input set or list of edges to be inserted
     """
     self.edges = {}	              # Maps node to list of forward neighbors
-    self.rev_edges = {}           # Maps node to list of backwards neighbors
     self.components = {}	        # Strong components of graph
     self.inverse_components = {}  # Maps each node to its component in the graph
+    self.i = 0                    # An integer for component numbers
 
     # Initialize graph, if desired
     for edge in edges:
@@ -62,13 +62,30 @@ class Graph:
     """
     s_node, e_node = edge.nodes
 
+    # Maintain forward graph + SCCs
+    if s_node not in self.inverse_components and e_node not in self.inverse_components:
+      self.inverse_components[s_node] = self.i
+      self.inverse_components[e_node] = self.i + 1
+      self.i += 2
+    elif s_node not in self.inverse_components:
+      self.inverse_components[s_node] = self.i
+      self.i += 1
+    elif e_node not in self.inverse_components:
+      self.inverse_components[e_node] = self.i
+      self.i += 1
+
     if s_node not in self.edges:
-      self.edges[s_node] = set()
+      self.edges[s_node] = { 'inter': set(), 'intra': set }
+    if self.inverse_components[s_node] != self.inverse_components[e_node]:
+      self.edges[s_node]['inter'].add(e_node)
+    else:
+      self.edges[s_node]['intra']
+
+    # Maintain reverse graph
     if e_node not in self.rev_edges:
       self.rev_edges[e_node] = set()
-    self.edges[s_node].add(e_node)
     self.rev_edges[e_node].add(s_node)
-
+ 
   def add_edges(self, edge_set):
     """
     Add multiple edges at once
@@ -131,6 +148,12 @@ class Graph:
     self.components = components
     self.inverse_components = inverse_components
     return components, inverse_components
+
+  def __partition_edges(self):
+    """
+    Private helper function to iterate over all edges in the graph
+    and maintain the intra/inter-component edges of the graph
+    """
 
   def __traverse(self, node, lowlinks, indices, index, components, inverse_components, visited):
     """
