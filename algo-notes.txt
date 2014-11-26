@@ -24,6 +24,46 @@ def remove_edges(E'):
   ADD: E' = { (A,B) in E }, G = (V,E) 
 --------
 
+def add_edges(E'):
+  nodes = G.get_nodes()
 
+  # Build mapping of edges and reverse edges
+  new_edges = {}
+  rev_new_edges = {}
+  graft_nodes = set()
+  for (A,B) in E':
+    if A not in new_edges:
+      new_edges[A] = set()
+      new_edges[A].add(B)
+    else:
+      new_edges[A].add(B)
 
+    if B not in rev_new_edges:
+      rev_new_edges[B] = set()
+      rev_new_edges[B].add(A)
+    else:
+      rev_new_edges[B].add(A)
+
+    if A in nodes:
+      graft_nodes.add(A)
+    if B in nodes:
+      graft_nodes.add(B)
+
+  # Ensure that the graft nodes only have outgoing edges;
+  graft_case = True
+  for node in graft_nodes:
+    if len(rev_new_edges[node]) != 0:
+      graft_case = False
+      break
+
+  # Graft Case
+  if graft_case:
+    G' = build graph of new edges
+    perform modified Tarjan on nodes/edges reachable by graft nodes only
+    merge results into G by adding in the SCC info for all nodes not in G
+      - also update the graft node's intercomponent edges
+
+  # Non-graft Case
+  else:
+    run Tarjan
 

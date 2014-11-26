@@ -48,6 +48,7 @@ class Graph:
     @param edges: optional input set or list of edges to be inserted
     """
     self.edges = {}	              # Maps node to list of forward neighbors
+
     self.inter_edges = {}         # Maps node to a list of neighbors that are NOT in its SCC
     self.intra_edges = {}         # Maps node to a list of neighbors that are in its SCC
     self.components = {}	        # Strong components of graph
@@ -65,23 +66,9 @@ class Graph:
     s_node, e_node = edge.nodes
 
     # Maintain forward graph + SCCs
-    if s_node not in self.inverse_components and e_node not in self.inverse_components:
-      self.inverse_components[s_node] = self.i
-      self.inverse_components[e_node] = self.i + 1
-      self.i += 2
-    elif s_node not in self.inverse_components:
-      self.inverse_components[s_node] = self.i
-      self.i += 1
-    elif e_node not in self.inverse_components:
-      self.inverse_components[e_node] = self.i
-      self.i += 1
-
-    if s_node not in self.edges:
-      self.edges[s_node] = { 'inter': set(), 'intra': set }
-    if self.inverse_components[s_node] != self.inverse_components[e_node]:
-      self.edges[s_node]['inter'].add(e_node)
-    else:
-      self.edges[s_node]['intra']
+    if s_node not in self.inter_edges:
+      self.inter_edges[s_node] = set()
+    self.inter_edges[s_node].add(e_node)
 
     # Maintain reverse graph
     if e_node not in self.rev_edges:
@@ -92,8 +79,37 @@ class Graph:
     """
     Add multiple edges at once
     """
+    graph_nodes = self.get_nodes()
+    
+    # Build reverse edges from edge_set
+    existing_nodes, rev_new_edges = set(), {}
     for edge in edge_set:
-      self.add_edge(edge)
+      s_node, e_node = edge.nodes
+      if e_node not in rev_new_edges:
+        rev_new_edges[e_node] = set()
+      rev_new_edges[e_node].add(s_node)
+
+      if s_node in graph_nodes:
+        existing_nodes.add(s_node)
+      if e_node in graph_nodes:
+        existing_nodes.add(e_node)
+
+    # Ensure that this is a graft case
+    graft_case = True
+    for node in existing_nodes:
+      if node in rev_new_edges:
+        graft_case = False
+        break
+
+    # If graft case, run graft case algorithm
+    if graft_case:
+      self.__graft_add(edge_set, existing_nodes)
+
+    # Else, run full Tarjan recompute
+    else:
+      for edge in edge_set:
+        self.add_edge(edge)
+      self.__compute_scc()
 
   def remove_edge(self, edge):
     """
@@ -132,7 +148,7 @@ class Graph:
     """
     O(|V|) time to retrieve all nodes in the graph
     """
-    return set(self.edges.keys()) | set(self.rev_edges.keys())
+    return set(self.intra_edges.keys()) | set(self.inter_edges.keys()) | set(self.rev_edges.keys())
 
   def compute_scc(self):
     """
@@ -151,11 +167,15 @@ class Graph:
     self.inverse_components = inverse_components
     return components, inverse_components
 
-  def __partition_edges(self):
+  def __contains_edge(self, edge):
     """
-    Private helper function to iterate over all edges in the graph
-    and maintain the intra/inter-component edges of the graph
+    @return True if the edge is in the graph, False otherwise
     """
+    s_node, e_node = edge.nodes
+    return e_node in self.intra_edges.get(s_node, set()) or e_node in self.inter_edges.get(s_node, set())
+
+  def __graft_add(self, edge_set, existing_nodes):
+    pass
 
   def __traverse(self, node, lowlinks, indices, index, components, inverse_components, visited):
     """
