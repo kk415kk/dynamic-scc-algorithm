@@ -14,6 +14,9 @@ def draw_graph(G, name='output_graph'):
 def draw_scc_graph(G, name='scc_graph'):
   graph = pydot.Dot('Forest')
   visited = set()
+  print ""
+  print "SCC Nodes:"
+  print "----------"
   for component in G.components:
     if component not in visited:
       nodes = G.components[component]
@@ -28,6 +31,10 @@ def draw_scc_graph(G, name='scc_graph'):
               graph.add_edge(edge)
   graph.write_png(name + '.png')
 
+def print_edges(edges):
+  for s_node in edges:
+    for e_node in edges[s_node]:
+      print LB.Edge(s_node, e_node)
 
 # Build a graph
 G = LB.Graph()
@@ -58,6 +65,31 @@ G.add_edges(set([e7]))
 G.add_edges(set([e8]))
 G.add_edges(set([e9]))
 G.compute_scc()
+G.optimized_remove_edges(set([e8, e9]))
+
+print "INTRA-EDGES"
+print "-----------------"
+print_edges(G.intra_edges)
+print "END"
+print ""
+
+print "INTER-EDGES"
+print "-----------------"
+print_edges(G.inter_edges)
+print "END"
+print ""
+
+print "INVERSE-COMPONENTS"
+print "--------------------"
+for node in G.inverse_components:
+  print node
+
+print "COMPONENTS"
+print "-----------"
+for scc in G.components:
+  print "----SCC----"
+  for node in G.components[scc]:
+    print node
 
 #LB.print_graph(G)
 #print "----------------------------------------"

@@ -98,12 +98,12 @@ class Graph:
       # Update edge partitions
       if s_node in self.intra_edges and e_node in self.intra_edges[s_node]: 
         self.intra_edges[s_node].remove(e_node)
-        if len(self.intra_edges[s_node] == 0):
+        if len(self.intra_edges[s_node]) == 0:
           del self.intra_edges[s_node]
 
       if s_node in self.inter_edges and e_node in self.inter_edges[s_node]: 
         self.inter_edges[s_node].remove(e_node)
-        if len(self.inter_edges[s_node] == 0):
+        if len(self.inter_edges[s_node]) == 0:
           del self.inter_edges[s_node]
 
       # If there are no outgoing edges from the start node, del it
@@ -113,20 +113,38 @@ class Graph:
         # If there are no incoming edges to the start node, del it
         if s_node in self.rev_edges and len(self.rev_edges[s_node]) == 0:
           del self.rev_edges[s_node]
+          # Maintain inverse components mapping
+          self.__clear_component_node(e_node)
 
-      # If there are no outgoing edges from the end node, del it
+        elif s_node not in self.rev_edges:
+          # Maintain inverse components mapping
+          self.__clear_component_node(snode)
+
+      # If there are no incoming edges to the end node, del it
       if len(self.rev_edges[e_node]) == 0:
         del self.rev_edges[e_node]
 
-        # If there are no incoming edges to the end node, del it
+        # If there are no outgoing edges from the end node, del it
         if e_node in self.edges and len(self.edges[e_node]) == 0:
           del self.edges[e_node]
+          # Maintain inverse components mapping
+          self.__clear_component_node(e_node)
+        elif e_node not in self.edges:
+          # Maintain inverse components mapping
+          self.__clear_component_node(e_node)
+
+  def __clear_component_node(self, node):
+    scc = self.inverse_components[node]
+    del self.inverse_components[node]
+    self.components[scc].remove(node)
+    if len(self.components[scc]) == 0:
+      del self.components[scc]
 
   def remove_edges(self, edges):
     """
     Remove multiple edges, one at a time
 
-    NOTE: Must call compute_scc() after this operation to maintain SCCs
+    NOTE: Must remove this from public API - improper use will result in error
     """
     for edge in edges:
       self.remove_edge(edge)
@@ -146,7 +164,7 @@ class Graph:
 
     for scc in check_scc:
       nodes = self.components[scc]
-      components, inverse_components = compute_partial_scc(nodes)
+      components, inverse_components = self.compute_partial_scc(nodes)
 
       # If the component got split up, we need to merge the results in
       # 1. Delete the scc from self.components
@@ -190,6 +208,7 @@ class Graph:
         if node not in self.inter_edges:
           self.inter_edges[node] = set()
         self.inter_edges[node] = self.inter_edges[node] & self.intra_edges[node]
+        del self.intra_edges[node]
       else:
         # The node was part of an SCC, is still now part of an SCC, 
         # so its edge is still part of an SCC and no changes need to be made.
