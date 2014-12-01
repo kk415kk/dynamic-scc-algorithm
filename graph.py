@@ -154,10 +154,6 @@ class Graph:
     Optimized bulk removal of edges
     @param edges: a set of edges to be removed
     """
-    print self.components.keys()
-    print self.scc_num
-    print self.components
-    print "-----****-----"
     check_scc = set()
     for edge in edges:
       s_node, e_node = edge.nodes
@@ -169,11 +165,6 @@ class Graph:
     for scc in check_scc:
       nodes = self.components[scc]
       components, inverse_components = self.compute_partial_scc(nodes)
-      print scc
-      print self.components[scc]
-      print components.keys()
-      print components
-      print inverse_components
 
       # If the component got split up, we need to merge the results in
       # 1. Delete the scc from self.components
@@ -216,7 +207,7 @@ class Graph:
       if len(components[scc]) == 1 and node in self.intra_edges:
         if node not in self.inter_edges:
           self.inter_edges[node] = set()
-        self.inter_edges[node] = self.inter_edges[node] & self.intra_edges[node]
+        self.inter_edges[node] = self.inter_edges[node] | self.intra_edges[node]
         del self.intra_edges[node]
       else:
         # The node was part of an SCC, is still now part of an SCC, 
