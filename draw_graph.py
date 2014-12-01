@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import pydot
-import graph as LB
+from graph import graph as LB
 import random
 
 def hex_color():
@@ -8,7 +8,7 @@ def hex_color():
   return '#%02X%02X%02X' % (r(),r(),r())
 
 # Draw the graph and generate
-def draw_graph(G, name='output_graph'):
+def draw_graph(G, name='../output_graph'):
   graph = pydot.Dot('Forest')
   scc_colors = {}
   visited_nodes = {}

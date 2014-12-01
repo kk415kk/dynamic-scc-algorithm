@@ -348,39 +348,16 @@ class Graph:
         graph_str += ("[%s %s]\n" % (str(s_node), str(n)))
     return graph_str
 
+
+
+#######################
+### TESTING METHODS ###
+#######################
 def print_graph(G):
   print str(G)
   print "Parents: %s\n" % G.parent
   print "Versions: %s\n" % G.version
   print "H: %s\n" % G.dynamic_set
-
-a = Node('A')
-b = Node('B')
-c = Node('C')
-d = Node('D')
-e = Node('E')
-f = Node('F')
-g = Node('G')
-
-e1 = Edge(a,b)
-e2 = Edge(a,c)
-e3 = Edge(c,a)
-e4 = Edge(b,c)
-e5 = Edge(c,d)
-e6 = Edge(d,c)
-e7 = Edge(e,f)
-e8 = Edge(f,e)
-e9 = Edge(c,g)
-e10 = Edge(b,a)
-e11 = Edge(g,c)
-
-edge_set1 = set([e1, e2, e3, e4])
-edge_set2 = set([e5])
-edge_set3 = set([e6])
-edge_set4 = set([e7])
-edge_set5 = set([e8, e9])
-edge_set6 = set([e10, e11])
-edge_sets = [edge_set1, edge_set2, edge_set3, edge_set4, edge_set5, edge_set6]
 
 def benchmark(edge_set_list):
   with Timer() as t:
@@ -389,30 +366,3 @@ def benchmark(edge_set_list):
       for edge in edge_set:
         G1.add_edge(edge)
   fsecs = float(t.secs)
-
-def test_graph():
-  a = Node('A')
-  b = Node('B')
-  c = Node('C')
-  e1 = Edge(a,b)
-  e2 = Edge(a,c)
-  e3 = Edge(c,a)
-  G = Graph()
-  print "Adding edge %s" % str(e1)
-  G.add_edge(e1)
-  print "Adding edge %s" % str(e2)
-  G.add_edge(e2)
-  print "Graph: "
-  print G
-  print ""
-  print "Removing edge %s" % str(e2)
-  G.remove_edge(e2)
-  print "Adding edge %s" % str(e2)
-  G.add_edge(e2)
-  print "Adding edge %s" % str(e3)
-  G.add_edge(e3)
-  print "Graph: "
-  print G
-  print ""
-  print "SCCs:"
-  print dict((str(node), i) for node, i in G.compute_scc().items())
