@@ -79,31 +79,31 @@ G.add_edges(set([e8]))
 G.add_edges(set([e9]))
 G.compute_scc()
 G.optimized_remove_edges(set([e8, e9]))
+G.optimized_remove_edges(set([e7, e5]))
 
+print "INTRA-EDGES"
+print "-----------------"
+print_edges(G.intra_edges)
+print "END"
+print ""
 
-# print "INTRA-EDGES"
-# print "-----------------"
-# print_edges(G.intra_edges)
-# print "END"
-# print ""
+print "INTER-EDGES"
+print "-----------------"
+print_edges(G.inter_edges)
+print "END"
+print ""
 
-# print "INTER-EDGES"
-# print "-----------------"
-# print_edges(G.inter_edges)
-# print "END"
-# print ""
+print "INVERSE-COMPONENTS"
+print "--------------------"
+for node in G.inverse_components:
+  print node
 
-# print "INVERSE-COMPONENTS"
-# print "--------------------"
-# for node in G.inverse_components:
-#   print node
-
-# print "COMPONENTS"
-# print "-----------"
-# for scc in G.components:
-#   print "----SCC----"
-#   for node in G.components[scc]:
-#     print node
+print "COMPONENTS"
+print "-----------"
+for scc in G.components:
+  print "----SCC----"
+  for node in G.components[scc]:
+    print node
 
 #LB.print_graph(G)
 #print "----------------------------------------"

@@ -118,7 +118,7 @@ class Graph:
 
         elif s_node not in self.rev_edges:
           # Maintain inverse components mapping
-          self.__clear_component_node(snode)
+          self.__clear_component_node(s_node)
 
       # If there are no incoming edges to the end node, del it
       if len(self.rev_edges[e_node]) == 0:
@@ -163,21 +163,24 @@ class Graph:
       self.remove_edge(edge)
 
     for scc in check_scc:
-      nodes = self.components[scc]
-      components, inverse_components = self.compute_partial_scc(nodes)
+      # Check if the SCC still exists; could be taken care of by cleanup
+      # code already
+      if scc in self.components:
+        nodes = self.components[scc]
+        components, inverse_components = self.compute_partial_scc(nodes)
 
-      # If the component got split up, we need to merge the results in
-      # 1. Delete the scc from self.components
-      # 2. Merge in the new components
-      # 3. Update all the nodes in self.inverse_components
-      # NOTE: We can re-use the number "scc" by replacing the max number of 
-      #       components with "scc", then going through all of inverse_comp
-      #       to reset those nodes to "scc"
-      if len(components) > 1:
-        del self.components[scc]
-        self.components.update(components)
-        self.inverse_components.update(inverse_components)
-        self.__partial_partition_edges(components, inverse_components, op='del')
+        # If the component got split up, we need to merge the results in
+        # 1. Delete the scc from self.components
+        # 2. Merge in the new components
+        # 3. Update all the nodes in self.inverse_components
+        # NOTE: We can re-use the number "scc" by replacing the max number of 
+        #       components with "scc", then going through all of inverse_comp
+        #       to reset those nodes to "scc"
+        if len(components) > 1:
+          del self.components[scc]
+          self.components.update(components)
+          self.inverse_components.update(inverse_components)
+          self.__partial_partition_edges(components, inverse_components, op='del')
 
   def __partial_partition_edges(self, components, inverse_components, op):
     """
