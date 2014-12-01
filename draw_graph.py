@@ -44,31 +44,6 @@ def draw_graph(G, name='output_graph'):
       graph.add_edge(edge)
   graph.write_png(name + '.png')
 
-# def draw_scc_graph(G, name='scc_graph'):
-#   graph = pydot.Dot('Forest')
-#   print ""
-#   print "SCC Nodes:"
-#   print "----------"
-#   for component in G.components:
-#     nodes = G.components[component]
-#     f_node = LB.Node(nodes)
-#     graph.add_node(pydot.Node(str(f_node)))
-
-
-#     print nodes
-#     for node in nodes:
-#       if node in G.inter_edges:
-#         e_nodes = G.inter_edges[node]
-#         for e_node in e_nodes:
-
-
-#       # if node in G.edges:
-#       #   for s_node in G.edges[node]:
-#       #     if s_node not in nodes:
-#       #       edge = pydot.Edge(str(f_node), str(s_node))
-#       #       graph.add_edge(edge)
-#   graph.write_png(name + '.png')
-
 def print_edges(edges):
   for s_node in edges:
     for e_node in edges[s_node]:
@@ -135,4 +110,3 @@ G.optimized_remove_edges(set([e8, e9]))
 #G.delete(set([e6]))
 #LB.print_graph(G)
 draw_graph(G)
-# draw_scc_graph(G)
