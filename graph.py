@@ -154,6 +154,10 @@ class Graph:
     Optimized bulk removal of edges
     @param edges: a set of edges to be removed
     """
+    print self.components.keys()
+    print self.scc_num
+    print self.components
+    print "-----****-----"
     check_scc = set()
     for edge in edges:
       s_node, e_node = edge.nodes
@@ -165,6 +169,11 @@ class Graph:
     for scc in check_scc:
       nodes = self.components[scc]
       components, inverse_components = self.compute_partial_scc(nodes)
+      print scc
+      print self.components[scc]
+      print components.keys()
+      print components
+      print inverse_components
 
       # If the component got split up, we need to merge the results in
       # 1. Delete the scc from self.components
@@ -279,10 +288,11 @@ class Graph:
       for e_node in self.edges[node]:
         if e_node not in nodes:
           continue
+
         if e_node not in indices:
           self.__traverse(e_node, lowlinks, indices, index, components, inverse_components, visited)
           lowlinks[node] = min(lowlinks[node], lowlinks[e_node])
-        else:
+        elif e_node in visited:
           lowlinks[node] = min(lowlinks[node], indices[e_node])
 
     lowlink = lowlinks[node]
@@ -307,7 +317,7 @@ class Graph:
         if e_node not in indices:
           self.__traverse(e_node, lowlinks, indices, index, components, inverse_components, visited)
           lowlinks[node] = min(lowlinks[node], lowlinks[e_node])
-        else:
+        elif e_node in visited:
           lowlinks[node] = min(lowlinks[node], indices[e_node])
 
     lowlink = lowlinks[node]

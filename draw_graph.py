@@ -67,6 +67,7 @@ G.add_edges(set([e9]))
 G.compute_scc()
 G.optimized_remove_edges(set([e8, e9]))
 
+
 print "INTRA-EDGES"
 print "-----------------"
 print_edges(G.intra_edges)
