@@ -8,7 +8,7 @@ def hex_color():
   return '#%02X%02X%02X' % (r(),r(),r())
 
 # Draw the graph and generate
-def draw_graph(G, name='../output_graph'):
+def draw_graph(G, name='output_graph'):
   graph = pydot.Dot('Forest')
   scc_colors = {}
   visited_nodes = {}
@@ -29,15 +29,16 @@ def draw_graph(G, name='../output_graph'):
 
     for e_node in G.edges[node]:
       if e_node not in visited_nodes:
-        col = hex_color()
+        col2 = hex_color()
         while col in scc_colors:
-          col = hex_color()
+          col2 = hex_color()
         scc = G.inverse_components[e_node]
+       
         if scc in scc_colors:
-          col = scc_colors[scc]
-        scc_colors[scc] = col
+          col2 = scc_colors[scc]
+        scc_colors[scc] = col2
 
-        pydot_enode = pydot.Node(str(e_node), style="filled", fillcolor=col)
+        pydot_enode = pydot.Node(str(e_node), style="filled", fillcolor=col2)
         edge = pydot.Edge(pydot_snode, pydot_enode)
       else:
         edge = pydot.Edge(pydot_snode, visited_nodes[e_node])
@@ -58,6 +59,8 @@ d = LB.Node('D')
 e = LB.Node('E')
 f = LB.Node('F')
 g = LB.Node('G')
+h = LB.Node('H')
+i = LB.Node('I')
 
 e1 = LB.Edge(a,b)
 e2 = LB.Edge(a,c)
@@ -68,6 +71,8 @@ e6 = LB.Edge(d,c)
 e7 = LB.Edge(e,f)
 e8 = LB.Edge(f,e)
 e9 = LB.Edge(c,g)
+e10 = LB.Edge(h,g)
+e11 = LB.Edge(g,i)
 
 edge_set = set([e1, e2, e3, e4])
 
@@ -75,11 +80,11 @@ G.add_edges(edge_set)
 G.add_edges(set([e5]))
 G.add_edges(set([e6]))
 G.add_edges(set([e7]))
-G.add_edges(set([e8]))
-G.add_edges(set([e9]))
+G.add_edges(set([e8, e11]))
+G.add_edges(set([e9, e10]))
 G.compute_scc()
-G.optimized_remove_edges(set([e8, e9]))
-G.optimized_remove_edges(set([e7, e5]))
+#G.optimized_remove_edges(set([e8, e9]))
+#G.optimized_remove_edges(set([e7, e5]))
 
 print "INTRA-EDGES"
 print "-----------------"
@@ -97,6 +102,7 @@ print "INVERSE-COMPONENTS"
 print "--------------------"
 for node in G.inverse_components:
   print node
+print ""
 
 print "COMPONENTS"
 print "-----------"
