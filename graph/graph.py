@@ -106,6 +106,7 @@ class Graph:
       self.add_edges(check_scc)
     else:
       # Handle graft case separately
+      self.__build_graft_graph(check_scc)
       return
 
   def __build_graft_graph(self, check_scc):
@@ -115,6 +116,7 @@ class Graph:
     3. 
     @param check_scc: a set of edges to be added
     """
+    pass
 
   def __build_edges(self, current_nodes, edge_set):
     """

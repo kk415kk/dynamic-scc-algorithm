@@ -1,10 +1,25 @@
 ------
 DELETE: E' = { (A,B) in E }, G = (V,E)
 ------
+Essentially, for each edge (A,B) to be deleted:
+  - Check if the nodes A, B are in the same SCC
+    - If they are NOT in the same SCC, just delete the edge 
+      and remove them from the inter-SCC edges
+    - If they ARE from the same SCC, keep track of the SCC
+  - For each of the affected SCCs:
+    - Run a limited version of Tarjan's algorithm:
+      - Only consider the nodes/edges within the SCC
+      - This generates a new set of SCCs
+    - Use the generated components mapping and inverse index 
+      on the components mapping to update the graph's internal
+      data structures
+    - Maintain the intra-SCC and inter-SCC edges:
+
 G contains:
   - a mapping of SCC to nodes --> SCC
   - a mapping of node to SCC ---> inverse_SCC
 
+PSEUDOCODE:
 def remove_edges(E'):
   check_scc = set()
 
@@ -23,6 +38,27 @@ def remove_edges(E'):
 --------
   ADD: E' = { (A,B) in E }, G = (V,E) 
 --------
+This is the harder case.
+For each edge (A,B) to be added:
+  - Check if the nodes A, B are in the same SCC
+    - If they ARE in the same SCC, just add the edge and insert
+      into the inter-SCC data structure
+    - If they are NOT in the same SCC, keep track of the edges
+  - Build a forward mapping of edges (node to list of neighbors)
+    as well as the reverse mapping (for the reverse graph)
+    - Keep track of which nodes are in the existing graph (for 
+    graft case)
+  - For all the overlapping nodes (the ones in the existing graph),
+    check if there are any inbound edges (check reverse graph)
+      - If there are, this is NOT a graft case, and we need to do
+        a full re-compute.
+      - If there aren't any, then we can handle the graft case:
+        1. Insert the edges into the existing graph.
+        2. Run a limited Tarjan's algorithm starting from one of 
+           the graft case nodes and only traverse those nodes.
+        3. Merge the resulting components mapping and inverse index
+           into the graph's internal data structures.
+
 
 def add_edges(E'):
 
