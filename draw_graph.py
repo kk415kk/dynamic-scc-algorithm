@@ -46,6 +46,9 @@ def draw_graph(G, name='output_graph'):
   graph.write_png(name + '.png')
 
 def print_edges(edges):
+  """
+  @param edges: the edges to print out
+  """
   for s_node in edges:
     for e_node in edges[s_node]:
       print LB.Edge(s_node, e_node)

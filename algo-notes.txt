@@ -25,6 +25,17 @@ def remove_edges(E'):
 --------
 
 def add_edges(E'):
+
+  check_scc = set()
+  for (A,B) in E':
+    if scc(A) == scc(B):
+      just add the edge to the intra_edges collection
+      add the edge to the graph
+    else:
+      add edge to check_scc
+
+
+
   nodes = G.get_nodes()
 
   # Build mapping of edges and reverse edges
