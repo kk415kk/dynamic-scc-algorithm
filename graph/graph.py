@@ -83,7 +83,31 @@ class Graph:
     check_scc = set()
     for edge in edge_set:
       s_node, e_node = edge.nodes
-      if self.inverse_components[s_node] == self.inverse_components[e_node]:
+      print "Adding edge: %s and %s" % (s_node, e_node) 
+      # First 3 cases are just adding inter-SCC edges, since one or more of the nodes
+      # were not part of the graph to begin with
+      if s_node not in self.inverse_components or e_node not in self.inverse_components:
+        self.add_edge(edge)
+        if s_node not in self.inter_edges:
+          self.inter_edges[s_node] = set()
+        self.inter_edges[s_node].add(e_node)
+
+      # First 3 cases as noted above
+      if s_node not in self.inverse_components and e_node not in self.inverse_components:
+        self.inverse_components[s_node] = self.scc_num
+        self.inverse_components[e_node] = self.scc_num + 1
+        self.components[self.scc_num] = set([s_node])
+        self.components[self.scc_num+1] = set([e_node])
+        self.scc_num += 2
+      elif s_node not in self.inverse_components:
+        self.inverse_components[s_node] = self.scc_num
+        self.components[self.scc_num] = set([s_node])
+        self.scc_num += 1
+      elif e_node not in self.inverse_components:
+        self.inverse_components[e_node] = self.scc_num
+        self.components[self.scc_num] = set([e_node])
+        self.scc_num += 1
+      elif self.inverse_components[s_node] == self.inverse_components[e_node]:
         self.add(edge)
         if s_node not in self.intra_edges:
           self.intra_edges[s_node] = set()
@@ -91,7 +115,7 @@ class Graph:
       else:
         check_scc.add(edge)
 
-    if len(check_scc) > 1:
+    if len(check_scc) > 0:
       self.__run_add_maintenance(check_scc)
 
   def __run_add_maintenance(self, check_scc):
@@ -127,16 +151,15 @@ class Graph:
 
     # Set difference to get non-overlapping nodes to update self.inverse_components
     non_overlapping_nodes = inverse_components.keys() - overlapping_nodes
-    inverse_components_subset = dict((node, inverse_components[node]) for node in non_overlapping_nodes)
-    
+    inverse_components_subset = dict((node, inverse_components[node]) for node in non_overlapping_nodes) 
+    self.inverse_components.update(inverse_components_subset)
+
     # Get the non-overlapping nodes to update self.components
     new_sccs = set(inverse_components_subset.values())
-    components_subset = dict((scc, components[scc]) for scc in new_sccs)
-
-    # Update inverse components with the non-overlapping nodes
-    self.inverse_components.update(inverse_components_subset)
-    # Update components with the non-overlapping nodes 
-    self.components.update(components_subset)
+    for scc in new_sccs:
+      if scc not in self.components:
+        self.components[scc] = set()
+      self.components[scc] = self.components[scc] & components[scc]
 
     # Maintain inter/intra-edge components
     self.__add_partial_partition_edges(overlapping_nodes, non_overlapping_nodes, inverse_components, forward_edges)
@@ -177,7 +200,7 @@ class Graph:
     """
     forward_edges, reverse_edges = {}, {}
     overlapping_nodes = set()
-    for edge in check_scc:
+    for edge in edge_set:
       s_node, e_node = edge.nodes
       if s_node not in forward_edges:
         forward_edges[s_node] = set()
@@ -201,7 +224,7 @@ class Graph:
     for node in overlapping_nodes:
       # If there is an incoming edge from the new nodes to an existing node,
       # it is not a graft case
-      if len(reverse_edges[node]) != 0:
+      if node not in reverse_edges:
         return False
     return True
 
