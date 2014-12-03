@@ -116,7 +116,7 @@ class Graph:
     3. 
     @param check_scc: a set of edges to be added
     """
-    pass
+    return
 
   def __build_edges(self, current_nodes, edge_set):
     """
