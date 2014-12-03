@@ -106,17 +106,70 @@ class Graph:
       self.add_edges(check_scc)
     else:
       # Handle graft case separately
-      self.__build_graft_graph(check_scc)
-      return
+      new_nodes = forward_edges.keys() | reverse_edges.keys()
+      self.__build_graft_graph(check_scc, new_nodes, overlapping_nodes, forward_edges)
 
-  def __build_graft_graph(self, check_scc):
+  def __build_graft_graph(self, check_scc, nodes, overlapping_nodes, forward_edges):
     """
     1. Build a new graph using these edges.
     2. Compute SCCs by using a partial Tarjan's algorithm.
-    3. 
+    3. Merge results into self.components, self.inverse_components
+    4. Maintain inter/intra edges
     @param check_scc: a set of edges to be added
+    @param nodes: a set of new nodes that are in the graft subgraph
+    @param overlapping_nodes: the set of nodes that were already in the
+                              existing graph
+    @param forward_edges: the new edges
     """
-    return
+    for edge in check_scc:
+      self.add_edge(edge)
+    components, inverse_components = self.compute_partial_scc(nodes)
+
+    # Set difference to get non-overlapping nodes to update self.inverse_components
+    non_overlapping_nodes = inverse_components.keys() - overlapping_nodes
+    inverse_components_subset = dict((node, inverse_components[node]) for node in non_overlapping_nodes)
+    
+    # Get the non-overlapping nodes to update self.components
+    new_sccs = set(inverse_components_subset.values())
+    components_subset = dict((scc, components[scc]) for scc in new_sccs)
+
+    # Update inverse components with the non-overlapping nodes
+    self.inverse_components.update(inverse_components_subset)
+    # Update components with the non-overlapping nodes 
+    self.components.update(components_subset)
+
+    # Maintain inter/intra-edge components
+    self.__add_partial_partition_edges(overlapping_nodes, non_overlapping_nodes, inverse_components, forward_edges)
+
+  def __add_partial_partition_edges(self, overlapping_nodes, non_overlapping_nodes, inverse_components, forward_edges):
+    """
+    Maintain the edge partitions after an insertion operation.
+    @param overlapping_nodes: the nodes that were already in the existing graph
+    @param non-overlapping_nodes: the opposite of overlapping nodes
+    @param inverse_components: the index of nodes mapping to SCCs
+    @param forward_edges: the edges that were part of the addition operation
+    """
+    # All new edges from graft case starting from an overlapping node
+    # must be an inter-SCC edge (by definition of graft case)
+    for node in overlapping_nodes:
+      if node in forward_edges:
+        for e_node in forward_edges[node]:
+          if node not in self.inter_edges:
+            self.inter_edges[node] = set()
+          self.inter_edges[node].add(e_node)
+
+    for node in non_overlapping_nodes:
+      for e_node in forward_edges[node]:
+        if inverse_components[node] == inverse_components[e_node]:
+          # If the edge is part of an SCC, add it to intra-SCC structure
+          if node not in self.intra_edges:
+            self.intra_edges[node] = set()
+          self.intra_edges[node].add(e_node)
+        else:
+          # Else, add it to the inter-SCC structure
+          if node not in self.inter_edges:
+            self.inter_edges[node] = set()
+          self.inter_edges[node].add(e_node)
 
   def __build_edges(self, current_nodes, edge_set):
     """
@@ -237,7 +290,7 @@ class Graph:
           del self.components[scc]
           self.components.update(components)
           self.inverse_components.update(inverse_components)
-          self.__partial_partition_edges(components, inverse_components, op='del')
+          self.__delete_partial_partition_edges(components, inverse_components)
 
   def get_nodes(self):
     """
@@ -374,22 +427,6 @@ class Graph:
         else:
           inter_edges[s_node].add(e_node)
     self.intra_edges, self.inter_edges = intra_edges, inter_edges
-
-  def __partial_partition_edges(self, components, inverse_components, op):
-    """
-    Different optimizations can be made depending on if the operation
-    that was just run was a deletion or insertion.
-    @param components: the partial components that were re-computed
-    @param inverse_components: the inverse index on the partial components
-    @param op: 'del' or 'add', depending on which graph operation was run
-    """
-    if op == 'del':
-      self.__delete_partial_partition_edges(components, inverse_components)
-    elif op == 'add':
-      # TODO
-      self.__partition_edges()
-    else:
-      return
 
   def __delete_partial_partition_edges(self, components, inverse_components):
     """
