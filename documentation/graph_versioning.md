@@ -55,10 +55,6 @@ A more complex version of a graph, with a vastly different implementation. This 
 * `compute_scc(self)`:
   * `@return` a list of sets of nodes that are in the same component
 
-Visualize
----
-Run `sudo pip install pydot` to install the Python dot interface for visualizing the graph. 
-
 Overview
 ---
 Disclaimer: the terms "component" and "strongly connected component" will be used interchangeably in the description below. Note that they both refer to a strongly connected component (SCC).
