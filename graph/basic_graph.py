@@ -1,4 +1,6 @@
 # See https://wiki.python.org/moin/TimeComplexity for running times
+### BASIC GRAPH ###
+
 class Node:
   """
   Class to represent a node. A node represents its own strongly connected component;
