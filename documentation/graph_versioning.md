@@ -1,6 +1,6 @@
 [Back](../README.md)
 
-Fully Dynamic SCC Maintenance Algorithm
+Graph Versioning Maintenance Algorithm
 ----
 Research in-progress as part of prototyping work for [LogicBlox](http://www.logicblox.com), based off of [Roditty and Zwick's paper](http://dl.acm.org/citation.cfm?id=1007387&dl=ACM&coll=DL&CFID=446154922&CFTOKEN=78521305). Some of the explanations below may be drawn directly from the paper.
 

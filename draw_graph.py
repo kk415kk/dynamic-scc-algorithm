@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import pydot
-from graph import graph as LB
+from graph import fd_graph as LB
 import random
 
 def hex_color():
@@ -119,11 +119,11 @@ q = LB.Node('Q')
 # G.optimized_remove_edges(set([e26]))
 
 # Test Case #4
-# e28 = LB.Edge(a,b)
-# e29 = LB.Edge(b,c)
-# e30 = LB.Edge(c,d)
-# G.optimized_add_edges(set([e28]))
-# G.optimized_add_edges(set([e29, e30]))
+e28 = LB.Edge(a,b)
+e29 = LB.Edge(b,c)
+e30 = LB.Edge(c,d)
+G.optimized_add_edges(set([e28]))
+G.optimized_add_edges(set([e29, e30]))
 
 
 
@@ -152,8 +152,4 @@ for scc in G.components:
   for node in G.components[scc]:
     print node
 
-# LB.print_graph(G)
-# print "----------------------------------------"
-# G.delete(set([e6]))
-# LB.print_graph(G)
 draw_graph(G)
