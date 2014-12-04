@@ -47,9 +47,9 @@ class Graph:
     """
     @param edges: optional input set or list of edges to be inserted
     """
-    self.edges = {}	              # Maps node to list of forward neighbors
+    self.edges = {}               # Maps node to list of forward neighbors
     self.rev_edges = {}           # Maps node to list of backwards neighbors
-    self.components = {}	        # Strong components of graph
+    self.components = {}          # Strong components of graph
     self.inverse_components = {}  # Maps each node to its component in the graph
 
     # Initialize graph, if desired
