@@ -102,8 +102,8 @@ e17 = LB.Edge(o,p)
 e18 = LB.Edge(p,q)
 e19 = LB.Edge(q,o)
 e20 = LB.Edge(q,l)
-G.add_edges(set([e12, e13, e14, e15, e16, e17, e18, e19, e20]))
-G.optimized_remove_edges(set([e13, e16]))
+G.optimized_add_edges(set([e12, e13, e14, e15, e16, e18, e19, e20]))
+#G.optimized_remove_edges(set([e13, e16]))
 
 # Test Case #3
 # e21 = LB.Edge(a,b)
@@ -116,6 +116,15 @@ G.optimized_remove_edges(set([e13, e16]))
 # G.optimized_add_edges(set([e21, e24]))
 # G.optimized_add_edges(set([e22, e23]))
 # G.optimized_add_edges(set([e25, e26, e27]))
+# G.optimized_remove_edges(set([e26]))
+
+# Test Case #4 - Graft Case
+# e28 = LB.Edge(a,b)
+# e29 = LB.Edge(b,c)
+# e30 = LB.Edge(c,d)
+# G.optimized_add_edges(set([e28]))
+# G.optimized_add_edges(set([e29, e30]))
+
 
 
 print "INTRA-EDGES"
@@ -130,18 +139,18 @@ print_edges(G.inter_edges)
 print "END"
 print ""
 
-print "INVERSE-COMPONENTS"
-print "--------------------"
-for node in G.inverse_components:
-  print node
-print ""
+# print "INVERSE-COMPONENTS"
+# print "--------------------"
+# for node in G.inverse_components:
+#   print node
+# print ""
 
-print "COMPONENTS"
-print "-----------"
-for scc in G.components:
-  print "----SCC----"
-  for node in G.components[scc]:
-    print node
+# print "COMPONENTS"
+# print "-----------"
+# for scc in G.components:
+#   print "----SCC----"
+#   for node in G.components[scc]:
+#     print node
 
 #LB.print_graph(G)
 #print "----------------------------------------"
