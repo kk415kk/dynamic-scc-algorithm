@@ -11,11 +11,11 @@ class Node:
   def __eq__(self, other):
     return self is other
   def __repr__(self):
-    return '<Node %s @%s>' % (str(self.value), str(hex(id(self))))
+    return '<Node "%s" @%s>' % (str(self.value), str(hex(id(self))))
   def __hash__(self):
     return hash(repr(self))
   def __str__(self):
-    return '<Node %s @%s>' % (str(self.value), str(hex(id(self))))
+    return '<Node "%s" @%s>' % (str(self.value), str(hex(id(self))))
 
 class Edge:
   """
@@ -26,11 +26,11 @@ class Edge:
   def __eq__(self, other):
     return self.nodes[0] == other.nodes[0] and self.nodes[1] == other.nodes[1]
   def __repr__(self):
-    return '[%s %s @%s]' % (str(self.nodes[0]), str(self.nodes[1]), str(hex(id(self))))
+    return '[Edge: %s %s @%s]' % (str(self.nodes[0]), str(self.nodes[1]), str(hex(id(self))))
   def __hash__(self):
     return hash(repr(self))
   def __str__(self):
-    return '[%s %s]' % (str(self.nodes[0]), str(self.nodes[1]))
+    return '[Edge: %s %s]' % (str(self.nodes[0]), str(self.nodes[1]))
 
 class Graph:
   """
