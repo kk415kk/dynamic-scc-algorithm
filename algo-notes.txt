@@ -63,6 +63,7 @@ Geoff's idea: consider looking at the collapsed graph only. The current
               implementation easily allows for this, since we can look
               up the inter-SCC edges of all the nodes in an SCC relatively
               quickly (O(|size of the SCC|))
+  - 
 
 def add_edges(E'):
 
