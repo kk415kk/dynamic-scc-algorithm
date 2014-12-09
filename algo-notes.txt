@@ -38,84 +38,26 @@ def remove_edges(E'):
 --------
   ADD: E' = { (A,B) in E }, G = (V,E) 
 --------
-This is the harder case.
-For each edge (A,B) to be added:
+Idea: consider looking at the collapsed graph only. The current
+      implementation easily allows for this, since we can look
+      up the inter-SCC edges of all the nodes in an SCC relatively
+      quickly (O(|size of the SCC|))
+      
+- For each (A,B) to be added:
   - Check if the nodes A, B are in the same SCC
     - If they ARE in the same SCC, just add the edge and insert
       into the inter-SCC data structure
     - If they are NOT in the same SCC, keep track of the edges
-  - Build a forward mapping of edges (node to list of neighbors)
-    as well as the reverse mapping (for the reverse graph)
-    - Keep track of which nodes are in the existing graph (for 
-    graft case)
-  - For all the overlapping nodes (the ones in the existing graph),
-    check if there are any inbound edges (check reverse graph)
-      - If there are, this is NOT a graft case, and we need to do
-        a full re-compute.
-      - If there aren't any, then we can handle the graft case:
-        1. Insert the edges into the existing graph.
-        2. Run a limited Tarjan's algorithm starting from one of 
-           the graft case nodes and only traverse those nodes.
-        3. Merge the resulting components mapping and inverse index
-           into the graph's internal data structures.
-
-Geoff's idea: consider looking at the collapsed graph only. The current
-              implementation easily allows for this, since we can look
-              up the inter-SCC edges of all the nodes in an SCC relatively
-              quickly (O(|size of the SCC|))
-  - 
-
-def add_edges(E'):
-
-  check_scc = set()
-  for (A,B) in E':
-    if scc(A) == scc(B):
-      just add the edge to the intra_edges collection
-      add the edge to the graph
-    else:
-      add edge to check_scc
-
-
-
-  nodes = G.get_nodes()
-
-  # Build mapping of edges and reverse edges
-  new_edges = {}
-  rev_new_edges = {}
-  graft_nodes = set()
-  for (A,B) in E':
-    if A not in new_edges:
-      new_edges[A] = set()
-      new_edges[A].add(B)
-    else:
-      new_edges[A].add(B)
-
-    if B not in rev_new_edges:
-      rev_new_edges[B] = set()
-      rev_new_edges[B].add(A)
-    else:
-      rev_new_edges[B].add(A)
-
-    if A in nodes:
-      graft_nodes.add(A)
-    if B in nodes:
-      graft_nodes.add(B)
-
-  # Ensure that the graft nodes only have outgoing edges;
-  graft_case = True
-  for node in graft_nodes:
-    if len(rev_new_edges[node]) != 0:
-      graft_case = False
-      break
-
-  # Graft Case
-  if graft_case:
-    G' = build graph of new edges
-    perform modified Tarjan on nodes/edges reachable by graft nodes only
-    merge results into G by adding in the SCC info for all nodes not in G
-      - also update the graft node's intercomponent edges
-
-  # Non-graft Case
-  else:
-    run Tarjan
-
+  - For all edges that need to be checked still:
+    - Insert them into the graph and into the inter-SCC edge structure
+    - Perform a limited Tarjan on the collapsed DAG of the graph by:
+      - Taking the starting node of each edge that needs to be checked
+        and lookup the SCC number of the node.
+      - Grab all the inter-SCC edges from the nodes in this SCC and traverse
+        those edges to the new SCCs
+      - The components map and its inverse index that is outputted by this
+        version of Tarjan's will have groups of SCC numbers rather than the
+        original nodes
+      - Any group that is larger than size 1 needs to have all of the SCCs
+        inside it merged.
+      - Move the relevant inter-SCC edges to the intra-SCC edge structure
