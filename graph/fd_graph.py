@@ -53,6 +53,19 @@ class Graph:
     self.add_edges(edges)
     self.compute_scc()
 
+  def add_node(self, node):
+    """
+    Adds a lone node to the graph.
+    Use add_edge instead if the node is not disconnected
+    from the graph (more efficient)
+    @param node: a Node object to be added
+    """
+    # If the node is not already in the graph, add it
+    if (not node in self.edges) or (not node in self.rev_edges):
+      self.inverse_components[node] = self.scc_num
+      self.components[self.scc_num] = set([node])
+      self.scc_num += 1
+
   def add_edge(self, edge):
     """
     O(1) time to add node to a set inside a map (dictionary)
@@ -68,7 +81,7 @@ class Graph:
 
   def add_edges(self, edge_set):
     """
-    Add multiple edges, one at a time.
+    NAIVE: Add multiple edges, one at a time.
     Computes the SCCs at the end to ensure graph structures are maintained.
     @param edge_set: the edges to be added to the graph
     """
@@ -89,7 +102,9 @@ class Graph:
 
       # First 3 cases are just adding inter-SCC edges, since one or more of the nodes
       # were not part of the graph to begin with
-      if s_node not in self.inverse_components or e_node not in self.inverse_components:
+      if s_node not in self.inverse_components or e_node not in self.inverse_components or \
+        self.__is_lone_node(s_node) or self.__is_lone_node(e_node):
+
         self.add_edge(edge)
         if s_node not in self.inter_edges:
           self.inter_edges[s_node] = set()
@@ -110,6 +125,10 @@ class Graph:
         self.inverse_components[e_node] = self.scc_num
         self.components[self.scc_num] = set([e_node])
         self.scc_num += 1
+      elif self.__is_lone_node(s_node) and self.__is_lone_node(e_node):
+        # The nodes are already in the graph, just disconnected
+        # We don't need to do anything here
+        pass
       elif self.inverse_components[s_node] == self.inverse_components[e_node]:
         self.add(edge)
         if s_node not in self.intra_edges:
@@ -121,6 +140,28 @@ class Graph:
     # If there are any edges that we need to check, let's run maintenance on them
     if len(check_scc) > 0:
       self.__run_add_maintenance(check_scc)
+
+  def remove_node(self, node):
+    """
+    Removes a node from the graph. If a node is not disconnected
+    from the rest of the graph, i.e. it has at least one edge, then
+    maintenance will be performed on the node to remove all edges 
+    connected to it.
+
+    @param node: the Node to be removed
+    """
+    # Remove hanging edges
+    if node in self.edges or node in self.rev_edges:
+      out_edges = set([Edge(node, e_node) for e_node in self.edges.get(node, set())])
+      in_edges = set([Edge(s_node, node) for s_node in self.rev_edges.get(node, set())])
+      self.optimized_remove_edges(out_edges | in_edges)
+
+    # Maintain SCC structures
+    scc = self.inverse_components[node]
+    del self.inverse_components[node]
+    self.components[scc].remove(node)
+    if len(self.components[scc]) == 0:
+      del self.components[scc]
 
   def remove_edge(self, edge):
     """
@@ -142,6 +183,7 @@ class Graph:
         self.inter_edges[s_node].remove(e_node)
         if len(self.inter_edges[s_node]) == 0:
           del self.inter_edges[s_node]
+
       # If there are no outgoing edges from the start node, del it
       if len(self.edges[s_node]) == 0:
         del self.edges[s_node]
@@ -149,10 +191,10 @@ class Graph:
         if s_node in self.rev_edges and len(self.rev_edges[s_node]) == 0:
           del self.rev_edges[s_node]
           # Maintain inverse components mapping
-          self.__clear_component_node(e_node)
-        elif s_node not in self.rev_edges:
+          #self.__clear_component_node(e_node)
+        #elif s_node not in self.rev_edges:
           # Maintain inverse components mapping
-          self.__clear_component_node(s_node)
+          #self.__clear_component_node(s_node)
       # If there are no incoming edges to the end node, del it
       if len(self.rev_edges[e_node]) == 0:
         del self.rev_edges[e_node]
@@ -160,10 +202,10 @@ class Graph:
         if e_node in self.edges and len(self.edges[e_node]) == 0:
           del self.edges[e_node]
           # Maintain inverse components mapping
-          self.__clear_component_node(e_node)
-        elif e_node not in self.edges:
+          #self.__clear_component_node(e_node)
+        #elif e_node not in self.edges:
           # Maintain inverse components mapping
-          self.__clear_component_node(e_node)
+          #self.__clear_component_node(e_node)
 
   def remove_edges(self, edge_set):
     """
@@ -434,6 +476,12 @@ class Graph:
           self.inter_edges[r_node] -= remove_nodes[r_node]
           if len(self.inter_edges[r_node]) == 0:
             del self.inter_edges[r_node]
+
+  def __is_lone_node(self, node):
+    """
+    @return if the node is a lone node (no edge connections)
+    """
+    return node not in self.edges and node not in self.rev_edges
 
   ### PARTIAL SCC COMPUTE METHODS: DELETION ###
   def __compute_partial_scc_deletion(self, nodes):

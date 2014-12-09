@@ -43,6 +43,15 @@ def draw_graph(G, name='output_graph'):
       else:
         edge = pydot.Edge(pydot_snode, visited_nodes[e_node])
       graph.add_edge(edge)
+
+  # Disconnected nodes
+  for node in (set(G.inverse_components.keys()) - set(G.edges.keys())):
+    col = hex_color()
+    while col in scc_colors:
+      col = hex_color()
+    pydot_node = pydot.Node(str(node), style='filled', fillcolor=col)
+    graph.add_node(pydot_node)
+
   graph.write_png(name + '.png')
 
 def print_edges(edges):
@@ -101,6 +110,25 @@ q = LB.Node('Q')
 # G.optimized_remove_edges(set([e8, e9]))
 # G.optimized_remove_edges(set([e7, e5]))
 
+# Test Case #1.5
+# Test Case #1
+# e1 = LB.Edge(a,b)
+# e2 = LB.Edge(a,c)
+# e3 = LB.Edge(c,a)
+# e4 = LB.Edge(b,c)
+# e5 = LB.Edge(c,d)
+# e6 = LB.Edge(d,c)
+# e7 = LB.Edge(e,f)
+# e8 = LB.Edge(f,e)
+# e9 = LB.Edge(c,g)
+# e10 = LB.Edge(h,g)
+# e11 = LB.Edge(g,i)
+# G.optimized_add_edges(set([e1, e2, e3, e4]))
+# G.optimized_add_edges(set([e5, e6, e7]))
+# G.optimized_add_edges(set([e8, e11]))
+# G.optimized_add_edges(set([e9, e10]))
+# G.remove_node(g)
+
 
 # Test Case #2
 # e12 = LB.Edge(j,k)
@@ -135,6 +163,15 @@ G.optimized_remove_edges(set([e26]))
 # G.optimized_add_edges(set([e28]))
 # G.optimized_add_edges(set([e29, e30]))
 
+# Test Case #5
+# e31 = LB.Edge(a,b)
+# e32 = LB.Edge(b,c)
+# e33 = LB.Edge(c,d)
+# G.add_node(a)
+# G.add_node(b)
+# G.optimized_add_edges(set([e33, e31]))
+# G.optimized_add_edges(set([e32]))
+# G.optimized_remove_edges(set([e32]))
 
 
 print "INTRA-EDGES"
