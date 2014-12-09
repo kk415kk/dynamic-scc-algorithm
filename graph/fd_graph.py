@@ -118,9 +118,21 @@ class Graph:
       else:
         check_scc.add(edge)
 
+    print "CHECK_SCC:\n==================="
+    for edge in check_scc:
+      print edge
+    print ""
+    print "INTRA:\n=================="
+    for s_node in self.intra_edges:
+      for e_node in self.intra_edges[s_node]:
+        print "%s %s" % (s_node, e_node)
+    print ""
+
+
     # If there are any edges that we need to check, let's run maintenance on them
     if len(check_scc) > 0:
-      self.__run_add_maintenance(check_scc)
+      #self.__run_add_maintenance(check_scc)
+      self.__test_run_add_maintenance(check_scc)
 
   def remove_edge(self, edge):
     """
@@ -312,73 +324,116 @@ class Graph:
         self.inter_edges[s_node] = set()
       self.inter_edges[s_node].add(e_node)
 
-    # Build the edge maps
-    nodes = self.get_nodes()
-    forward_edges = {}
-    for edge in check_scc:
-      s_node, e_node = edge.nodes
-      if s_node not in forward_edges:
-        forward_edges[s_node] = set()
-      forward_edges[s_node].add(e_node)
+    print "INTER (AFTER):\n==================="
+    for s_node in self.inter_edges:
+      for e_node in self.inter_edges[s_node]:
+        print "%s %s" % (s_node, e_node)
+    print ""
+
+    print "COMPONENTS (BEFORE):\n===================="
+    for scc in self.components:
+      print "Component %s" % scc
+      for node in self.components[scc]:
+        print node
+    print ""
+
+    print "INVERSE COMPONENTS (BEFORE):\n===================="
+    for node in self.inverse_components:
+      print "%s: %s" % (node, scc)
+    print ""
 
     # Modified Tarjan's algorithm on the DAG of the graph
-    components, inverse_components = self.__partial_compute_dag(check_scc)
+    components, inverse_components = self.__partial_compute_dag_scc(check_scc)
+    print "DAG Components:\n======================"
+    for scc_group in components:
+      print "Group: %s" % components[scc_group]
+    print ""
+    print "DAG Inverse Components:\n======================"
+    for scc in inverse_components:
+      print "SCC: %s\t Group Number: %s" % (scc, inverse_components[scc])
+    print ""
 
     # Check for each edge in check_scc whether any SCCs have been joined
+    affected_sccs = set()
     for scc_group in components:
       if len(components[scc_group]) > 1:
         sccs = components[scc_group]
+        print "\t------- Merging %s" % sccs
+        keep_scc = next(iter(sccs))
+        affected_sccs.add(keep_scc)
         merged_nodes = set([node for scc in sccs for node in self.components[scc]])
-        self.components[sccs[0]] = merged_nodes
 
-        for scc in sccs[1:]:
+        self.components[keep_scc] = merged_nodes
+
+        for scc in (sccs - set([keep_scc])):
           del self.components[scc]
         for node in merged_nodes:
-          self.inverse_components[node] = sccs[0]
+          self.inverse_components[node] = keep_scc
+
+    print "COMPONENTS (MERGED):\n===================="
+    for scc in self.components:
+      print "Component %s" % scc
+      for node in self.components[scc]:
+        print node
+    print ""
+
+    print "INVERSE COMPONENTS (MERGED):\n===================="
+    for node in self.inverse_components:
+      print "%s: %s" % (node, scc)
+    print ""
+
+    print "Affected SCCs: %s\n" % affected_sccs
 
     # Partition the edges into intra_edges if necessary
-    for edge in check_scc:
-      s_node, e_node = edge.nodes
-      if inverse_components[s_node] == inverse_components[e_node]:
+    for scc in affected_sccs:
+      nodes = self.components[scc]
+      for node in nodes:
+        remove_nodes = {}
+        for e_node in self.inter_edges.get(node, set()):
+          if self.inverse_components[node] == self.inverse_components[e_node]:
+            if node not in self.intra_edges:
+              self.intra_edges[node] = set()
+            self.intra_edges[node].add(e_node)
 
-        # Maintain edge partitions
-        if s_node in self.inter_edges and e_node in self.inter_edges[s_node]:
-          self.inter_edges[s_node].remove(e_node)
-          if len(self.inter_edges[s_node]) == 0:
-            del self.inter_edges[s_node]
+            # Nodes for removal (cannot remove during iteration)
+            if node not in remove_nodes:
+              remove_nodes[node] = set()
+            remove_nodes[node].add(e_node)
 
-        if s_node not in self.intra_edges:
-          self.intra_edges[s_node] = set()
-        self.intra_edges.add(e_node)
+        for r_node in remove_nodes:
+          self.inter_edges[r_node] -= remove_nodes[r_node]
+          if len(self.inter_edges[r_node]) == 0:
+            del self.inter_edges[r_node]
+
 
   def __partial_compute_dag_scc(self, check_scc):
     index, lowlinks, indices, components, inverse_components, visited = [self.scc_num], {}, {}, {}, {}, []
-    traversed_scc = set()
     for edge in check_scc:
       s_node, e_node = edge.nodes
       scc = self.inverse_components[s_node]
       if scc not in indices:
         self.__traverse_dag(scc, lowlinks, indices, index, components, inverse_components, visited)
+    return components, inverse_components
 
   def __traverse_dag(self, scc, lowlinks, indices, index, components, inverse_components, visited):
     """
     Traverses the collapsed DAG of the graph instead of the individual nodes. The components map 
     and inverse index reflects the SCC numbers rather than the individual nodes in the SCC.
     """
-    inter_edges = self.inter_edges[scc]
+    inter_edges = dict((node, self.inter_edges[node]) for node in self.components[scc] if node in self.inter_edges)
 
     indices[scc], lowlinks[scc] = index[0], index[0]
     index[0] = index[0] + 1
     visited.append(scc)
 
-    next_sccs = [self.inverse_components[inter_edges[node]] for node in inter_edges]
+    next_sccs = [self.inverse_components[e_node] for node in inter_edges for e_node in inter_edges[node]]
 
-    for scc in next_sccs:
-      if scc not in indices:
-        self.__partial_addition_traverse(scc, lowlinks, indices, index, components, inverse_components, visited)
-        lowlinks[scc] = min(lowlinks[scc], lowlinks[scc])
+    for n_scc in next_sccs:
+      if n_scc not in indices:
+        self.__traverse_dag(n_scc, lowlinks, indices, index, components, inverse_components, visited)
+        lowlinks[scc] = min(lowlinks[scc], lowlinks[n_scc])
       elif scc in visited:
-        lowlinks[scc] = min(lowlinks[scc], indices[scc])        
+        lowlinks[scc] = min(lowlinks[scc], indices[n_scc])        
 
     lowlink = lowlinks[scc]
     if lowlink == indices[scc] and len(visited) > 0:
