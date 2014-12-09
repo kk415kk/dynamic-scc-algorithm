@@ -118,21 +118,9 @@ class Graph:
       else:
         check_scc.add(edge)
 
-    print "CHECK_SCC:\n==================="
-    for edge in check_scc:
-      print edge
-    print ""
-    print "INTRA:\n=================="
-    for s_node in self.intra_edges:
-      for e_node in self.intra_edges[s_node]:
-        print "%s %s" % (s_node, e_node)
-    print ""
-
-
     # If there are any edges that we need to check, let's run maintenance on them
     if len(check_scc) > 0:
-      #self.__run_add_maintenance(check_scc)
-      self.__test_run_add_maintenance(check_scc)
+      self.__run_add_maintenance(check_scc)
 
   def remove_edge(self, edge):
     """
@@ -313,7 +301,7 @@ class Graph:
     self.intra_edges, self.inter_edges = intra_edges, inter_edges
 
   ### PARTIAL SCC COMPUTE METHODS: ADDITION ###
-  def __test_run_add_maintenance(self, check_scc):
+  def __run_add_maintenance(self, check_scc):
     """
     Traverse collapsed nodes instead.
     """
@@ -324,41 +312,28 @@ class Graph:
         self.inter_edges[s_node] = set()
       self.inter_edges[s_node].add(e_node)
 
-    print "INTER (AFTER):\n==================="
-    for s_node in self.inter_edges:
-      for e_node in self.inter_edges[s_node]:
-        print "%s %s" % (s_node, e_node)
-    print ""
-
-    print "COMPONENTS (BEFORE):\n===================="
-    for scc in self.components:
-      print "Component %s" % scc
-      for node in self.components[scc]:
-        print node
-    print ""
-
-    print "INVERSE COMPONENTS (BEFORE):\n===================="
-    for node in self.inverse_components:
-      print "%s: %s" % (node, scc)
-    print ""
-
     # Modified Tarjan's algorithm on the DAG of the graph
-    components, inverse_components = self.__partial_compute_dag_scc(check_scc)
-    print "DAG Components:\n======================"
-    for scc_group in components:
-      print "Group: %s" % components[scc_group]
-    print ""
-    print "DAG Inverse Components:\n======================"
-    for scc in inverse_components:
-      print "SCC: %s\t Group Number: %s" % (scc, inverse_components[scc])
-    print ""
+    components, inverse_components = self.__compute_partial_scc_addition(check_scc)
 
     # Check for each edge in check_scc whether any SCCs have been joined
+    affected_sccs = self.__merge_components(components, inverse_components)
+
+    # Partition the edges into intra_edges if necessary
+    self.__add_partial_partition_edges(affected_sccs)
+
+  def __merge_components(self, components, inverse_components):
+    """
+    Merges the relevant components based on the partially traversed collapsed DAG
+    of the graph.
+    @param components
+    @param inverse_components
+    @return the affected SCCs (the ones that are merged - returns the number of the
+      SCC that everything was merged into)
+    """
     affected_sccs = set()
     for scc_group in components:
       if len(components[scc_group]) > 1:
         sccs = components[scc_group]
-        print "\t------- Merging %s" % sccs
         keep_scc = next(iter(sccs))
         affected_sccs.add(keep_scc)
         merged_nodes = set([node for scc in sccs for node in self.components[scc]])
@@ -369,22 +344,77 @@ class Graph:
           del self.components[scc]
         for node in merged_nodes:
           self.inverse_components[node] = keep_scc
+    return affected_sccs
 
-    print "COMPONENTS (MERGED):\n===================="
-    for scc in self.components:
-      print "Component %s" % scc
-      for node in self.components[scc]:
-        print node
-    print ""
+  def __compute_partial_scc_addition(self, check_scc):
+    """
+    Computes the SCCs of the graph from traversing just the nodes in question,
+    considering only intra-SCC edges
 
-    print "INVERSE COMPONENTS (MERGED):\n===================="
-    for node in self.inverse_components:
-      print "%s: %s" % (node, scc)
-    print ""
+    NOTE: The partial SCC compute does NOT partition the edges, so those need to
+          be updated by the calling method.
 
-    print "Affected SCCs: %s\n" % affected_sccs
+    @param check_scc: the edges that need to be checked
+    @return a dictionary mapping component number to a set of component nodes, 
+            and a reverse dictionary mapping a node to the component number,
+            and the traversed edges
+    """
+    index, lowlinks, indices, components, inverse_components, visited = [self.scc_num], {}, {}, {}, {}, []
+    for edge in check_scc:
+      s_node, e_node = edge.nodes
+      scc = self.inverse_components[s_node]
+      if scc not in indices:
+        self.__partial_addition_traverse(scc, lowlinks, indices, index, components, inverse_components, visited)
+    return components, inverse_components
 
-    # Partition the edges into intra_edges if necessary
+  def __partial_addition_traverse(self, scc, lowlinks, indices, index, components, inverse_components, visited):
+    """
+    Traverses the collapsed DAG of the graph instead of the individual nodes. The components map 
+    and inverse index reflects the SCC numbers rather than the individual nodes in the SCC.
+
+    Private helper function to perform DFS and compute components
+    of graph (final components in lowlinks)
+
+    The partial version ONLY considers the nodes passed in as the 
+    last argument. Any edges that lead to a node not in that set will
+    be ignored. This is for the ADDITION case.
+    @param scc: the SCC we're currently on
+    @param lowlinks, indices: numbers used to track when a node was traversed
+    @param index: the current unused index number
+    @param components: the forward components mapping of SCC number to node
+    @param inverse_components: the inverse index on components
+    @param visited: the visited nodes
+    """
+    inter_edges = dict((node, self.inter_edges[node]) for node in self.components[scc] if node in self.inter_edges)
+
+    indices[scc], lowlinks[scc] = index[0], index[0]
+    index[0] = index[0] + 1
+    visited.append(scc)
+
+    next_sccs = [self.inverse_components[e_node] for node in inter_edges for e_node in inter_edges[node]]
+
+    for n_scc in next_sccs:
+      if n_scc not in indices:
+        self.__partial_addition_traverse(n_scc, lowlinks, indices, index, components, inverse_components, visited)
+        lowlinks[scc] = min(lowlinks[scc], lowlinks[n_scc])
+      elif scc in visited:
+        lowlinks[scc] = min(lowlinks[scc], indices[n_scc])        
+
+    lowlink = lowlinks[scc]
+    if lowlink == indices[scc] and len(visited) > 0:
+      components[lowlink] = set()
+      c_scc = None 
+      while len(visited) > 0 and c_scc != scc:
+        c_scc = visited.pop()
+        inverse_components[c_scc] = lowlink
+        components[lowlink].add(c_scc)
+
+  def __add_partial_partition_edges(self, affected_sccs):
+    """
+    Maintain the edge partitions after an insertion operation.
+    @param affected_sccs: the SCCs whose edges need to be re-partitioned
+    """
+    # Update edge partitioning
     for scc in affected_sccs:
       nodes = self.components[scc]
       for node in nodes:
@@ -404,169 +434,6 @@ class Graph:
           self.inter_edges[r_node] -= remove_nodes[r_node]
           if len(self.inter_edges[r_node]) == 0:
             del self.inter_edges[r_node]
-
-
-  def __partial_compute_dag_scc(self, check_scc):
-    index, lowlinks, indices, components, inverse_components, visited = [self.scc_num], {}, {}, {}, {}, []
-    for edge in check_scc:
-      s_node, e_node = edge.nodes
-      scc = self.inverse_components[s_node]
-      if scc not in indices:
-        self.__traverse_dag(scc, lowlinks, indices, index, components, inverse_components, visited)
-    return components, inverse_components
-
-  def __traverse_dag(self, scc, lowlinks, indices, index, components, inverse_components, visited):
-    """
-    Traverses the collapsed DAG of the graph instead of the individual nodes. The components map 
-    and inverse index reflects the SCC numbers rather than the individual nodes in the SCC.
-    """
-    inter_edges = dict((node, self.inter_edges[node]) for node in self.components[scc] if node in self.inter_edges)
-
-    indices[scc], lowlinks[scc] = index[0], index[0]
-    index[0] = index[0] + 1
-    visited.append(scc)
-
-    next_sccs = [self.inverse_components[e_node] for node in inter_edges for e_node in inter_edges[node]]
-
-    for n_scc in next_sccs:
-      if n_scc not in indices:
-        self.__traverse_dag(n_scc, lowlinks, indices, index, components, inverse_components, visited)
-        lowlinks[scc] = min(lowlinks[scc], lowlinks[n_scc])
-      elif scc in visited:
-        lowlinks[scc] = min(lowlinks[scc], indices[n_scc])        
-
-    lowlink = lowlinks[scc]
-    if lowlink == indices[scc] and len(visited) > 0:
-      components[lowlink] = set()
-      c_scc = None 
-      while len(visited) > 0 and c_scc != scc:
-        c_scc = visited.pop()
-        inverse_components[c_scc] = lowlink
-        components[lowlink].add(c_scc)
-  # ====================================== #
-
-  def __run_add_maintenance(self, check_scc):
-    """
-    NOTE: Graft maintenance case was removed to generalize for all cases.
-    Runs a limited Tarjan from the start nodes of each edge to re-compute
-    the components mapping and its inverse index. Then maintains the edge
-    partitions.
-    @param check_scc: the edges that need to be checked
-    """
-    # Build the edge maps
-    nodes = self.get_nodes()
-    forward_edges = {}
-    for edge in check_scc:
-      s_node, e_node = edge.nodes
-      if s_node not in forward_edges:
-        forward_edges[s_node] = set()
-      forward_edges[s_node].add(e_node)
-
-    # Run limited Tarjan's SCC algorithm on the reachable parts of the edges to be checked
-    components, inverse_components, traversed_edges = self.__compute_partial_scc_addition(check_scc)
-
-    # Update the components map and the inverse index
-    affected_nodes = inverse_components.keys()
-    affected_sccs = set()
-    for node in affected_nodes:
-      if node in nodes:
-        curr_scc = self.inverse_components[node]
-        affected_sccs.add(curr_scc)
-    for scc in affected_sccs:
-      del self.components[scc]
-
-    self.components.update(components)
-    self.inverse_components.update(inverse_components)
-
-    # Maintain the edge partitions
-    self.__add_partial_partition_edges(traversed_edges)
-
-  def __compute_partial_scc_addition(self, check_scc):
-    """
-    Computes the SCCs of the graph from traversing just the nodes in question,
-    considering only intra-SCC edges
-
-    NOTE: The partial SCC compute does NOT partition the edges, so those need to
-          be updated by the calling method.
-
-    @param check_scc: the edges that need to be checked
-    @return a dictionary mapping component number to a set of component nodes, 
-            and a reverse dictionary mapping a node to the component number,
-            and the traversed edges
-    """
-    index, lowlinks, indices, components, inverse_components, visited = [self.scc_num], {}, {}, {}, {}, []
-    traversed_edges = {}
-    for edge in check_scc:
-      s_node, e_node = edge.nodes
-      if s_node not in indices:
-        self.__partial_addition_traverse(s_node, lowlinks, indices, index, components, inverse_components, visited, traversed_edges)
-    self.scc_num = index[0]
-    return components, inverse_components, traversed_edges
-
-  def __partial_addition_traverse(self, node, lowlinks, indices, index, components, inverse_components, visited, traversed_edges):
-    """
-    Private helper function to perform DFS and compute components
-    of graph (final components in lowlinks)
-
-    The partial version ONLY considers the nodes passed in as the 
-    last argument. Any edges that lead to a node not in that set will
-    be ignored. This is for the ADDITION case.
-    @param node: a Node object to start traversing from
-    @param lowlinks, indices: numbers used to track when a node was traversed
-    @param index: the current unused index number
-    @param components: the forward components mapping of SCC number to node
-    @param inverse_components: the inverse index on components
-    @param visited: the visited nodes
-    @param traversed_edges: edges that are traversed during this process
-    """
-    indices[node], lowlinks[node] = index[0], index[0]
-    index[0] = index[0] + 1
-    visited.append(node)
-    if node in self.edges:
-      if node not in traversed_edges:
-        traversed_edges[node] = set()
-
-      for e_node in self.edges[node]:
-        traversed_edges[node].add(e_node)
-        if e_node not in indices:
-          self.__partial_addition_traverse(e_node, lowlinks, indices, index, components, inverse_components, visited, traversed_edges)
-          lowlinks[node] = min(lowlinks[node], lowlinks[e_node])
-        elif e_node in visited:
-          lowlinks[node] = min(lowlinks[node], indices[e_node])
-
-    lowlink = lowlinks[node]
-    if lowlink == indices[node] and len(visited) > 0:
-      components[lowlink] = set()
-      c_node = None 
-      while len(visited) > 0 and c_node != node:
-        c_node = visited.pop()
-        inverse_components[c_node] = lowlink
-        components[lowlink].add(c_node)
-
-  def __add_partial_partition_edges(self, traversed_edges):
-    """
-    Maintain the edge partitions after an insertion operation.
-    @param traversed_edges: the edges that were traversed
-    """
-    # Update edge partitioning
-    for s_node in traversed_edges:
-      for e_node in traversed_edges[s_node]:
-        if self.inverse_components[s_node] == self.inverse_components[e_node]:
-          if s_node in self.inter_edges and e_node in self.inter_edges[s_node]:
-            self.inter_edges[s_node].remove(e_node)
-            if len(self.inter_edges[s_node]) == 0:
-              del self.inter_edges[s_node]
-          if s_node not in self.intra_edges:
-            self.intra_edges[s_node] = set()
-          self.intra_edges[s_node].add(e_node)
-        else:
-          if s_node in self.intra_edges and e_node in self.intra_edges[s_node]:
-            self.intra_edges[s_node].remove(e_node)
-            if len(self.intra_edges[s_node]) == 0:
-              del self.intra_edges[s_node]
-          if s_node not in self.inter_edges:
-            self.inter_edges[s_node] = set()
-          self.inter_edges[s_node].add(e_node)
 
   ### PARTIAL SCC COMPUTE METHODS: DELETION ###
   def __compute_partial_scc_deletion(self, nodes):
