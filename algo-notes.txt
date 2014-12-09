@@ -1,5 +1,7 @@
+EDGES
+=======================
 ------
-DELETE: E' = { (A,B) in E }, G = (V,E)
+EDGES: DELETE: E' = { (A,B) in E }, G = (V,E)
 ------
 Essentially, for each edge (A,B) to be deleted:
   - Check if the nodes A, B are in the same SCC
@@ -36,7 +38,7 @@ def remove_edges(E'):
     run tarjan's algorithm on the scc in question, only considering nodes/edges within the scc
 
 --------
-  ADD: E' = { (A,B) in E }, G = (V,E) 
+EDGES: ADD: E' = { (A,B) not in E }, G = (V,E) 
 --------
 Idea: consider looking at the collapsed graph only. The current
       implementation easily allows for this, since we can look
@@ -61,3 +63,34 @@ Idea: consider looking at the collapsed graph only. The current
       - Any group that is larger than size 1 needs to have all of the SCCs
         inside it merged.
       - Move the relevant inter-SCC edges to the intra-SCC edge structure
+
+
+NODES
+===========
+-------
+NODES: DELETE: V' = { v in E or reverse_E }, G = (V,E)
+-------
+NOTE that it's better (and safer) to remove the edges before removing the nodes
+- For each node v in V'
+  - Check if there are any inbound/outbound edges on v using the 
+    edge adjancency list and the reverse edges adjacency list
+      - If there are any, remove them in bulk first
+  - Look up v in the inverse index on components map
+  - Remove v from inverse index
+  - Remove v from its SCC in components map
+  - Clean up components map if the SCC is empty now
+
+-------
+NODES: ADD: V' = { v not in E or reverse_E }, G = (V,E)
+-------
+- For each node v in V':
+  - Add the node to the inverse index on the components map
+  - Increment index counter
+  - Add the node to the components map
+
+
+
+POSSIBLE OPTIMIZATIONS:
+- Keeping track of numbers we can re-use and using them before using the next index number for SCCs
+- Heuristic of size of change / size of graph to see if we can do full-recompute instead
+  - Need a hashing scheme so we don't change unchanged SCCs

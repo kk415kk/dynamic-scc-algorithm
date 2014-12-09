@@ -66,6 +66,13 @@ class Graph:
       self.components[self.scc_num] = set([node])
       self.scc_num += 1
 
+  def add_nodes(self, nodes):
+    """
+    @param nodes: a set of Nodes to be added
+    """
+    for node in nodes:
+      self.add_node(node)
+
   def add_edge(self, edge):
     """
     O(1) time to add node to a set inside a map (dictionary)
@@ -162,6 +169,14 @@ class Graph:
     self.components[scc].remove(node)
     if len(self.components[scc]) == 0:
       del self.components[scc]
+
+  def remove_nodes(self, nodes):
+    """
+    Removes multiple nodes
+    @param nodes: a set of Node objects
+    """
+    for node in nodes:
+      self.remove_node(node)
 
   def remove_edge(self, edge):
     """
