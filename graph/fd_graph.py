@@ -566,8 +566,8 @@ class Graph:
     @param components: the partial components that were re-computed
     @param inverse_components: the inverse index on the partial components
 
-    POSSIBLE BUG: Iterate through the intra-SCC edges and check if the two
-    nodes are part of the same SCC; if not, move to inter-SCC edges.
+    POSSIBLE BUG (FIXED NOW): Iterate through the intra-SCC edges and check 
+    if the two nodes are part of the same SCC; if not, move to inter-SCC edges.
     """
     for node in inverse_components:
       scc = inverse_components[node]
@@ -576,8 +576,11 @@ class Graph:
           if inverse_components[node] == inverse_components[e_node]:
             if node not in self.inter_edges:
               self.inter_edges[node] = set()
-            self.inter_edges[node] = self.inter_edges[node] | self.intra_edges[node]
-            del self.intra_edges[node]          
+            self.inter_edges[node].add(e_node)
+            
+            self.intra_edges[node].remove(e_node)
+            if len(self.intra_edges[node]) == 0:
+              del self.intra_edges[node]
 
       # if len(components[scc]) == 1 and node in self.intra_edges:
       #   if node not in self.inter_edges:
