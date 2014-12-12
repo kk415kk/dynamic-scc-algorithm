@@ -241,6 +241,7 @@ class Graph:
     check_scc = set()
     for edge in edge_set:
       s_node, e_node = edge.nodes
+      # If intra-SCC edge, keep track of the SCC of the start node
       if self.inverse_components[s_node] == self.inverse_components[e_node]:
         scc = self.inverse_components[s_node]
         check_scc.add(scc)
@@ -564,14 +565,25 @@ class Graph:
     just move all of the node's intra-SCC edges to inter-SCC ones.
     @param components: the partial components that were re-computed
     @param inverse_components: the inverse index on the partial components
+
+    POSSIBLE BUG: Iterate through the intra-SCC edges and check if the two
+    nodes are part of the same SCC; if not, move to inter-SCC edges.
     """
     for node in inverse_components:
       scc = inverse_components[node]
-      if len(components[scc]) == 1 and node in self.intra_edges:
-        if node not in self.inter_edges:
-          self.inter_edges[node] = set()
-        self.inter_edges[node] = self.inter_edges[node] | self.intra_edges[node]
-        del self.intra_edges[node]
+      if node in self.intra_edges:
+        for e_node in self.intra_edges[node]:
+          if inverse_components[node] == inverse_components[e_node]:
+            if node not in self.inter_edges:
+              self.inter_edges[node] = set()
+            self.inter_edges[node] = self.inter_edges[node] | self.intra_edges[node]
+            del self.intra_edges[node]          
+
+      # if len(components[scc]) == 1 and node in self.intra_edges:
+      #   if node not in self.inter_edges:
+      #     self.inter_edges[node] = set()
+      #   self.inter_edges[node] = self.inter_edges[node] | self.intra_edges[node]
+      #   del self.intra_edges[node]
       else:
         # The node was part of an SCC, is still now part of an SCC, 
         # so its edge is still part of an SCC and no changes need to be made.
